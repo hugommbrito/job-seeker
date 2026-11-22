@@ -1,0 +1,5 @@
+#!/bin/sh
+# Commit messages are as public as the code, so they go through the same denylist.
+set -e
+root="$(git rev-parse --show-toplevel)"
+python3 "$root/scripts/hygiene.py" message "$1"

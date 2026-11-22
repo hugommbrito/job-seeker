@@ -1,0 +1,13 @@
+# Secret scanning. Runs in CI over the full history and, when gitleaks is installed, in the
+# pre-commit hook. Personal data is a different problem with a different tool: scripts/hygiene.py.
+title = "job-seeker"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Lockfiles hold package integrity hashes, which look like secrets and are not"
+paths = [
+  '''(^|/)pnpm-lock\.yaml$''',
+  '''(^|/)uv\.lock$''',
+]

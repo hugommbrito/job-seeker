@@ -1,0 +1,15 @@
+#!/bin/sh
+# Refuses a commit that would publish personal data, a saved document or a personal email
+# address. Enabled by scripts/setup-dev.sh (git config core.hooksPath .githooks).
+set -e
+root="$(git rev-parse --show-toplevel)"
+
+python3 "$root/scripts/hygiene.py" staged
+
+# Secrets are a different failure from personal data, with a different tool. The hook does not
+# fail when gitleaks is absent, because CI runs it on every push.
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --pre-commit --staged --redact --no-banner "$root"
+else
+  echo "pre-commit: gitleaks is not installed, so the secret scan is left to CI" >&2
+fi

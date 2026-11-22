@@ -1,0 +1,30 @@
+# Personal data never enters git (project rule 1). Real CVs, emails, labels, eval output and the
+# private planning context live here.
+private/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+backend/staticfiles/
+
+# Web
+node_modules/
+web/dist/
+*.tsbuildinfo
+coverage/
