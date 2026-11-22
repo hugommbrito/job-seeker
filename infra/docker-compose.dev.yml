@@ -1,0 +1,32 @@
+# Local development: only the database runs in Docker. Django and Vite run on the host.
+#
+#   docker compose --env-file .env -f infra/docker-compose.dev.yml up -d
+#
+# The bootstrap script runs once, when the volume is empty. To run it again against the running
+# container (new password, new role), see the Makefile target `db-bootstrap`.
+name: job-seeker-dev
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg18
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      MIGRATOR_DB_PASSWORD: ${MIGRATOR_DB_PASSWORD:?set MIGRATOR_DB_PASSWORD in .env}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD in .env}
+      # Development only: the test runner creates and drops its own database as migrator.
+      MIGRATOR_CREATEDB: "1"
+    ports:
+      # Bound to loopback, and off 5432 so it does not collide with a Postgres on the host.
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      # Since the 18 image the volume is the parent directory, not .../data.
+      - pgdata:/var/lib/postgresql
+      - ./postgres/bootstrap.sh:/docker-entrypoint-initdb.d/10-bootstrap.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d jobseeker"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

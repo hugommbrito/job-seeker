@@ -1,0 +1,63 @@
+[project]
+name = "job-seeker-backend"
+version = "0.1.0"
+description = "Self-hosted job-search assistant: API, ranking and background work"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "argon2-cffi>=25.1.0",
+    "dj-database-url>=3.1.2",
+    "django>=6.1.3",
+    "django-ninja>=1.8.0",
+    "gunicorn>=27.0.1",
+    "psycopg[binary]>=3.3.9",
+    "whitenoise>=6.12.0",
+]
+
+[dependency-groups]
+dev = [
+    "django-stubs>=6.1.2",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.17.6",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings_test"
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+filterwarnings = [
+    "error",
+    # WhiteNoise notes that collectstatic has not run, which is true and irrelevant in tests.
+    "ignore:No directory at:UserWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+extend-exclude = ["apps/*/migrations/0*.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "DJ", "PT", "RUF", "S"]
+ignore = [
+    "S101",   # assert is how the type checker is told what a value is
+    "RUF012", # Django's Meta and class attributes are conventionally plain lists
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S108", "S603", "S607", "S608"]
+
+[tool.mypy]
+python_version = "3.14"
+plugins = ["mypy_django_plugin.main"]
+strict = true
+mypy_path = "."
+exclude = ["^tests/", "/migrations/"]
+
+[[tool.mypy.overrides]]
+module = ["dj_database_url", "whitenoise.*"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings_test"
