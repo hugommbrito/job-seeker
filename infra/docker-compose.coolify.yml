@@ -1,0 +1,55 @@
+# Production services, deployed by Coolify with the Docker Compose build pack.
+#
+#   Base Directory:           /
+#   Docker Compose Location:  /infra/docker-compose.coolify.yml
+#
+# Postgres is NOT in this file. It is a standalone Coolify database resource, because that is
+# what Coolify's scheduled backups cover. See docs/operations/deploy.md.
+#
+# The two services run the same image with different credentials:
+#
+#   migrate  one-shot, runs before api starts, and is the only holder of the schema owner's
+#            credentials. Coolify gives every variable set in its UI to every service in a
+#            compose file, so that credential is deliberately not a variable: it is a file on
+#            the server, mounted into this service alone.
+#   api      serves the app as the `app` role, which row-level security binds.
+
+x-build: &build
+  context: .
+  dockerfile: infra/Dockerfile
+
+services:
+  migrate:
+    build: *build
+    command: ["migrate"]
+    restart: "no"
+    # A finished one-shot container must not count as an unhealthy deployment. This key is
+    # Coolify's own; plain `docker compose` rejects the file because of it.
+    exclude_from_hc: true
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?}
+      DATABASE_URL_FILE: /run/secrets/migrator_database_url
+    volumes:
+      - /data/job-seeker/secrets/migrator_database_url:/run/secrets/migrator_database_url:ro
+
+  api:
+    build: *build
+    command: ["api"]
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?}
+      # The public hostname, without scheme.
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?}
+      # The `app` role's DSN. The entrypoint refuses to start with any role that could bypass
+      # row-level security.
+      DATABASE_URL: ${APP_DATABASE_URL:?}
+      # Coolify's proxy is the one hop that appends to X-Forwarded-For. Raise this if a CDN
+      # sits in front of it.
+      TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
+      # Leave at 0 until HTTPS is confirmed working, then set a real value: browsers remember.
+      DJANGO_HSTS_SECONDS: ${DJANGO_HSTS_SECONDS:-0}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+    # The health check is defined in the image (GET /health on port 8000).
