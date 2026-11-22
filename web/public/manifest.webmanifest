@@ -1,0 +1,12 @@
+{
+  "name": "job-seeker",
+  "short_name": "job-seeker",
+  "description": "Self-hosted job-search assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
