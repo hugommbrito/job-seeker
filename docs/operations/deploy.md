@@ -25,13 +25,15 @@ docker version --format '{{.Server.Version}}'
 
 The Coolify version is shown at the top of its sidebar.
 
-| Fact | Needed | Found |
+| Fact | Needed | Found on 2026-11-22 |
 | --- | --- | --- |
-| Architecture | `x86_64` or `aarch64`; the image builds on either | |
-| CPU cores | 2 or more (Coolify's own minimum) | |
-| Memory available with Coolify running | About 1 GB for Phase 0 (Postgres and two web workers). The full service list in the plan (Redis, two workers, the scheduler, the model gateway) needs roughly 3 GB more. Both figures are estimates: measure with `docker stats` after the first deploy | |
-| Free disk | 10 GB or more; each build keeps a Node layer and a Python layer | |
-| Coolify | 4.x | |
+| Architecture | `x86_64` or `aarch64`; the image builds on either | `aarch64`, the architecture the local rehearsal built and ran on |
+| CPU cores | 2 or more (Coolify's own minimum) | 2 |
+| Memory available with Coolify running | About 1 GB for Phase 0 (Postgres and two web workers). The full service list in the plan (Redis, two workers, the scheduler, the model gateway) needs roughly 3 GB more. Both figures are estimates: measure with `docker stats` after the first deploy | 9.0 GiB available of 11 GiB, and 4 GiB of swap unused |
+| Free disk | 10 GB or more; each build keeps a Node layer and a Python layer | 23 GB free of 49 GB. Docker's data directory is on the root filesystem, so images, the build cache, the database volume and local backup copies all draw on it |
+| Coolify | 4.x | Not recorded yet |
+
+**Go** on architecture, cores, memory and disk. The Coolify version is still to be read.
 
 **No-go** if memory or disk is short: fix that first, because a build that runs the server out
 of memory takes Coolify down with it.
