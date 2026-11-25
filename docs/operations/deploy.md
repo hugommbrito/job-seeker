@@ -4,12 +4,13 @@ How the app is deployed on a single server managed by Coolify, and how to check 
 sound. The reasoning behind the layout is in
 [ADR 0004](../adr/0004-deployment-topology-on-coolify.md).
 
-**Status on 2026-11-21: not yet deployed.** Everything in this runbook that can run without the
-server has been rehearsed locally with Docker: the image, `migrate` followed by `api`, the
-schema owner's credential read from a mounted file, `api` refusing that credential, the smoke
-test with two users, and bootstrap-then-restore of a backup. The Coolify-specific steps are
-written from Coolify's documentation (version 4.7) and are marked **verify** where the first
-deploy has to confirm them.
+**Status on 2026-11-24: deployed, and section 5 passed** (`verify`, the smoke test with two
+users and HSTS on, `make hygiene`, and a browser sign-in). Before the server existed, the image,
+`migrate` followed by `api`, the mounted credential, `api` refusing that credential and
+bootstrap-then-restore were rehearsed locally with Docker. The Coolify-specific steps were
+written from Coolify's documentation (version 4.7); the server runs 4.3.23, and the steps below
+are corrected where the first deploy found them wrong. Rows still marked **verify** were not
+checked on that deploy.
 
 ## 0. Server facts: go or no-go
 
@@ -23,7 +24,8 @@ df -h / /var/lib/docker                    # disk
 docker version --format '{{.Server.Version}}'
 ```
 
-The Coolify version is shown at the top of its sidebar.
+The Coolify version is shown at the top of its sidebar, and on every container it deploys:
+`docker inspect <container> --format '{{index .Config.Labels "coolify.version"}}'`.
 
 | Fact | Needed | Found on 2026-11-22 |
 | --- | --- | --- |
@@ -31,9 +33,9 @@ The Coolify version is shown at the top of its sidebar.
 | CPU cores | 2 or more (Coolify's own minimum) | 2 |
 | Memory available with Coolify running | About 1 GB for Phase 0 (Postgres and two web workers). The full service list in the plan (Redis, two workers, the scheduler, the model gateway) needs roughly 3 GB more. Both figures are estimates: measure with `docker stats` after the first deploy | 9.0 GiB available of 11 GiB, and 4 GiB of swap unused |
 | Free disk | 10 GB or more; each build keeps a Node layer and a Python layer | 23 GB free of 49 GB. Docker's data directory is on the root filesystem, so images, the build cache, the database volume and local backup copies all draw on it |
-| Coolify | 4.x | Not recorded yet |
+| Coolify | 4.x | 4.3.23, with Traefik 3.6 as its proxy |
 
-**Go** on architecture, cores, memory and disk. The Coolify version is still to be read.
+**Go** on every row.
 
 **No-go** if memory or disk is short: fix that first, because a build that runs the server out
 of memory takes Coolify down with it.
@@ -84,13 +86,16 @@ sudo chmod 400 /data/job-seeker/secrets/migrator_database_url
 2. Under **Advanced**, enable **Connect to Predefined Network**, so the services can reach the
    database resource.
 3. Add the domain to the `api` service with the container port as a suffix, for example
-   `https://jobs.example.org:8000`. Coolify's proxy issues the certificate.
+   `https://jobs.example.org:8000`. Coolify's proxy issues the certificate. A compose
+   application has one domain field per service; if the services are not listed, press
+   **Reload Compose File**. Leave `migrate` without a domain. The domain reaches the proxy only
+   through labels written at deploy time, so saving the field is not enough: **Redeploy**.
 4. Set the variables:
 
    | Variable | Value |
    | --- | --- |
    | `DJANGO_SECRET_KEY` | 50 or more random characters: `python3 -c "import secrets; print(secrets.token_urlsafe(64))"` |
-   | `DJANGO_ALLOWED_HOSTS` | The public hostname, without scheme |
+   | `DJANGO_ALLOWED_HOSTS` | The public hostname only: `jobs.example.org`, with no scheme, port or trailing slash |
    | `APP_DATABASE_URL` | The `app` DSN from step 1 |
    | `TRUSTED_PROXY_COUNT` | `1`; `2` if a CDN sits in front of Coolify's proxy |
    | `DJANGO_HSTS_SECONDS` | `0` for the first deploy; `31536000` once HTTPS is confirmed |
@@ -106,6 +111,15 @@ sudo chmod 400 /data/job-seeker/secrets/migrator_database_url
 | The absolute bind mount reaches `migrate` unchanged | `migrate` connects; a missing file fails with "No such file" | Same command as above, and remove the `migrate` service from the compose file |
 | The schema owner's DSN is absent from `api` | `docker exec <api-container> env \| grep -c migrator` prints `0` | Do not proceed until it does |
 | The finished `migrate` container does not mark the deployment unhealthy (`exclude_from_hc`) | The deployment shows as healthy | Same as the first row |
+
+**When the site does not answer**, while `api` shows as healthy. Its health check calls
+`localhost` from inside the container, so it passes even when no outside request can reach the
+app.
+
+| Symptom from outside | Cause | Fix |
+| --- | --- | --- |
+| The certificate is `CN=TRAEFIK DEFAULT CERT`; HTTP gives 404 | The proxy has no route for the host: `docker inspect <api-container>` shows no `traefik.*` label | Set the domain on the `api` service and redeploy (step 3). A container created before the change still lacks the labels |
+| Every path, `/health` included, gives an empty `Bad Request (400)` from gunicorn | Django rejects the `Host` header: `DJANGO_ALLOWED_HOSTS` is missing the hostname or carries a scheme or port | Correct the variable and redeploy |
 
 ## 4. Users
 
@@ -133,6 +147,18 @@ scripts/smoke.py https://jobs.example.org --user someone@example.org --user othe
 # the git history.
 make hygiene
 ```
+
+Run `verify` after creating the users. Its last check counts the tenant rows readable with no
+user set, and it only tests something once tenant rows exist: in Phase 0 nothing writes a
+profile, so it reports 0 on an empty table. The role and policy checks are what it proves until
+then.
+
+`smoke.py` requires the HSTS header on an `https://` URL, so it reports one failure while
+`DJANGO_HSTS_SECONDS` is `0`. That is the signal to raise it: every other check passing means
+HTTPS works. If it fails at once with `CERTIFICATE_VERIFY_FAILED: unable to get local issuer
+certificate`, the local Python has no CA certificates (the python.org installer on macOS ships
+without them): run `Install Certificates.command` from its folder in `/Applications`. A
+`self signed certificate` error instead is the server's: see the table in section 3.
 
 The catalog meta-test and the canary isolation suite run on every commit in CI against a real
 Postgres, as the `app` role. `verify` applies the same catalog rules to the deployed database.
