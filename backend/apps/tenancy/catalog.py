@@ -43,6 +43,56 @@ def _has_user_column(table: str) -> str | None:
     return rows[0][0] if rows else None
 
 
+def foreign_keys() -> list[tuple[str, list[str], str, list[str]]]:
+    """Every foreign key in the schema as (table, columns, referenced table, referenced columns)."""
+    rows = _rows(
+        """
+        SELECT child.relname,
+               ARRAY(SELECT a.attname FROM unnest(con.conkey) WITH ORDINALITY AS k(num, pos)
+                     JOIN pg_attribute a ON a.attrelid = con.conrelid AND a.attnum = k.num
+                     ORDER BY k.pos),
+               parent.relname,
+               ARRAY(SELECT a.attname FROM unnest(con.confkey) WITH ORDINALITY AS k(num, pos)
+                     JOIN pg_attribute a ON a.attrelid = con.confrelid AND a.attnum = k.num
+                     ORDER BY k.pos)
+        FROM pg_constraint con
+        JOIN pg_class child ON child.oid = con.conrelid
+        JOIN pg_class parent ON parent.oid = con.confrelid
+        JOIN pg_namespace n ON n.oid = child.relnamespace
+        WHERE con.contype = 'f' AND n.nspname = 'public'
+        """
+    )
+    return [
+        (table, list(cols), parent, list(parent_cols)) for table, cols, parent, parent_cols in rows
+    ]
+
+
+def cross_tenant_reference_problems(
+    keys: list[tuple[str, list[str], str, list[str]]], tenant: frozenset[str]
+) -> list[str]:
+    """Name every reference between two tenant tables that does not also match the owner.
+
+    Each such reference needs a second key on (column, user_id) -> (id, user_id), added with
+    ``sql.same_tenant_foreign_key``; without it the database accepts a row that points into
+    another user's data.
+    """
+    paired = {
+        (table, cols[0], parent)
+        for table, cols, parent, parent_cols in keys
+        if len(cols) == 2 and cols[1] == "user_id" and parent_cols == ["id", "user_id"]
+    }
+    problems = []
+    for table, cols, parent, _parent_cols in keys:
+        if table not in tenant or parent not in tenant or cols == ["user_id"] or len(cols) != 1:
+            continue
+        if (table, cols[0], parent) not in paired:
+            problems.append(
+                f"{table}.{cols[0]}: references {parent} without matching the owner; "
+                "add sql.same_tenant_foreign_key"
+            )
+    return sorted(problems)
+
+
 def catalog_problems() -> list[str]:
     """Return every way the database differs from the tenancy rules. Empty means sound."""
     problems: list[str] = []
@@ -93,6 +143,8 @@ def catalog_problems() -> list[str]:
             problems.append(f"{table}: the policy does not filter reads by user")
         if "app.user_id" not in (check or ""):
             problems.append(f"{table}: the policy does not check writes")
+
+    problems += cross_tenant_reference_problems(foreign_keys(), tenant)
 
     for table in sorted(set(policies) - tenant):
         problems.append(f"{table}: carries a policy but is not a tenant table")

@@ -4,6 +4,129 @@
  */
 
 export interface paths {
+    "/api/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Applications */
+        get: operations["apps_applications_api_list_applications"];
+        put?: never;
+        /** Create Application */
+        post: operations["apps_applications_api_create_application"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Application */
+        get: operations["apps_applications_api_get_application"];
+        put?: never;
+        post?: never;
+        /** Delete Application */
+        delete: operations["apps_applications_api_delete_application"];
+        options?: never;
+        head?: never;
+        /** Update Application */
+        patch: operations["apps_applications_api_update_application"];
+        trace?: never;
+    };
+    "/api/applications/{application_id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close Application */
+        post: operations["apps_applications_api_close_application"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Event */
+        post: operations["apps_applications_api_add_event"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application_id}/events/{event_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Event */
+        delete: operations["apps_applications_api_delete_event"];
+        options?: never;
+        head?: never;
+        /** Update Event */
+        patch: operations["apps_applications_api_update_event"];
+        trace?: never;
+    };
+    "/api/applications/{application_id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reopen Application */
+        post: operations["apps_applications_api_reopen_application"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application_id}/stage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move Application */
+        post: operations["apps_applications_api_move_application"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/csrf": {
         parameters: {
             query?: never;
@@ -96,10 +219,249 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ApplicationDetailOut */
+        ApplicationDetailOut: {
+            /** Applied At */
+            applied_at: string | null;
+            /** Closed At */
+            closed_at: string | null;
+            /** Company Name */
+            company_name: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Decision Due At */
+            decision_due_at: string | null;
+            /** Events */
+            events: components["schemas"]["EventOut"][];
+            /** Id */
+            id: number;
+            /**
+             * Last Activity At
+             * Format: date
+             */
+            last_activity_at: string;
+            /** Last Interview At */
+            last_interview_at: string | null;
+            /** Location */
+            location: string;
+            /** Next Action */
+            next_action: string;
+            /** Next Action Due */
+            next_action_due: string | null;
+            /** Notes */
+            notes: string;
+            outcome: components["schemas"]["Outcome"] | null;
+            /** Posting Snapshot */
+            posting_snapshot: {
+                [key: string]: unknown;
+            };
+            /** Posting Url */
+            posting_url: string;
+            /** Role Title */
+            role_title: string;
+            /** Source */
+            source: string;
+            stage: components["schemas"]["Stage"];
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ApplicationFilters */
+        ApplicationFilters: {
+            /**
+             * Q
+             * @default
+             */
+            q: string;
+            /**
+             * Sort
+             * @default updated
+             * @enum {string}
+             */
+            sort: "updated" | "company" | "applied" | "next_action";
+            /** Stage */
+            stage?: ("discovered" | "saved" | "preparing" | "applied" | "recruiter" | "interviews" | "offer" | "accepted")[];
+            /**
+             * Status
+             * @default all
+             * @enum {string}
+             */
+            status: "open" | "closed" | "all";
+        };
+        /** ApplicationIn */
+        ApplicationIn: {
+            /** Applied At */
+            applied_at?: string | null;
+            /** Closed On */
+            closed_on?: string | null;
+            /** Company Name */
+            company_name: string;
+            /** Last Interview At */
+            last_interview_at?: string | null;
+            /**
+             * Location
+             * @default
+             */
+            location: string;
+            /**
+             * Next Action
+             * @default
+             */
+            next_action: string;
+            /** Next Action Due */
+            next_action_due?: string | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            outcome?: components["schemas"]["Outcome"] | null;
+            /**
+             * Posting Url
+             * @default
+             */
+            posting_url: string;
+            /** Role Title */
+            role_title: string;
+            /**
+             * Source
+             * @default
+             */
+            source: string;
+            /** @default saved */
+            stage: components["schemas"]["Stage"];
+        };
+        /** ApplicationOut */
+        ApplicationOut: {
+            /** Applied At */
+            applied_at: string | null;
+            /** Closed At */
+            closed_at: string | null;
+            /** Company Name */
+            company_name: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Decision Due At */
+            decision_due_at: string | null;
+            /** Id */
+            id: number;
+            /**
+             * Last Activity At
+             * Format: date
+             */
+            last_activity_at: string;
+            /** Last Interview At */
+            last_interview_at: string | null;
+            /** Location */
+            location: string;
+            /** Next Action */
+            next_action: string;
+            /** Next Action Due */
+            next_action_due: string | null;
+            /** Notes */
+            notes: string;
+            outcome: components["schemas"]["Outcome"] | null;
+            /** Posting Url */
+            posting_url: string;
+            /** Role Title */
+            role_title: string;
+            /** Source */
+            source: string;
+            stage: components["schemas"]["Stage"];
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ApplicationPatch */
+        ApplicationPatch: {
+            /** Applied At */
+            applied_at?: string | null;
+            /** Company Name */
+            company_name?: string | null;
+            /** Location */
+            location?: string | null;
+            /** Next Action */
+            next_action?: string | null;
+            /** Next Action Due */
+            next_action_due?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /** Posting Url */
+            posting_url?: string | null;
+            /** Role Title */
+            role_title?: string | null;
+            /** Source */
+            source?: string | null;
+        };
+        /** CloseIn */
+        CloseIn: {
+            outcome: components["schemas"]["Outcome"];
+        };
         /** ErrorOut */
         ErrorOut: {
             /** Detail */
             detail: string;
+        };
+        /** EventIn */
+        EventIn: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "note" | "interview";
+            /** Occurred On */
+            occurred_on?: string | null;
+            /**
+             * Text
+             * @default
+             */
+            text: string;
+        };
+        /**
+         * EventKind
+         * @enum {string}
+         */
+        EventKind: "created" | "stage_changed" | "closed" | "reopened" | "note" | "interview";
+        /** EventOut */
+        EventOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Editable */
+            editable: boolean;
+            /** Id */
+            id: number;
+            kind: components["schemas"]["EventKind"];
+            /**
+             * Occurred On
+             * Format: date
+             */
+            occurred_on: string;
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            };
+            /** Text */
+            text: string;
+        };
+        /** EventPatch */
+        EventPatch: {
+            /** Occurred On */
+            occurred_on?: string | null;
+            /** Text */
+            text?: string | null;
         };
         /** LoginIn */
         LoginIn: {
@@ -108,6 +470,12 @@ export interface components {
             /** Password */
             password: string;
         };
+        /**
+         * Outcome
+         * @description How an application ended without being accepted. The stage it reached is kept.
+         * @enum {string}
+         */
+        Outcome: "rejected" | "ghosted" | "withdrawn";
         /** ProfileOut */
         ProfileOut: {
             /** Timezone */
@@ -118,6 +486,15 @@ export interface components {
          * @enum {string}
          */
         Role: "owner" | "member" | "demo";
+        /**
+         * Stage
+         * @enum {string}
+         */
+        Stage: "discovered" | "saved" | "preparing" | "applied" | "recruiter" | "interviews" | "offer" | "accepted";
+        /** StageIn */
+        StageIn: {
+            stage: components["schemas"]["Stage"];
+        };
         /** UserOut */
         UserOut: {
             /** Email */
@@ -133,6 +510,271 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    apps_applications_api_list_applications: {
+        parameters: {
+            query?: {
+                status?: "open" | "closed" | "all";
+                stage?: ("discovered" | "saved" | "preparing" | "applied" | "recruiter" | "interviews" | "offer" | "accepted")[];
+                q?: string;
+                sort?: "updated" | "company" | "applied" | "next_action";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationOut"][];
+                };
+            };
+        };
+    };
+    apps_applications_api_create_application: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicationIn"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDetailOut"];
+                };
+            };
+        };
+    };
+    apps_applications_api_get_application: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDetailOut"];
+                };
+            };
+        };
+    };
+    apps_applications_api_delete_application: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    apps_applications_api_update_application: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicationPatch"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDetailOut"];
+                };
+            };
+        };
+    };
+    apps_applications_api_close_application: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CloseIn"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDetailOut"];
+                };
+            };
+        };
+    };
+    apps_applications_api_add_event: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventIn"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOut"];
+                };
+            };
+        };
+    };
+    apps_applications_api_delete_event: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+                event_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    apps_applications_api_update_event: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+                event_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventPatch"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOut"];
+                };
+            };
+        };
+    };
+    apps_applications_api_reopen_application: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDetailOut"];
+                };
+            };
+        };
+    };
+    apps_applications_api_move_application: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StageIn"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDetailOut"];
+                };
+            };
+        };
+    };
     apps_accounts_api_csrf: {
         parameters: {
             query?: never;

@@ -7,14 +7,17 @@ them and which policies they carry, and compares that with what the code claims.
 from __future__ import annotations
 
 import io
+from datetime import date
 
 import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import DatabaseError, connection, transaction
 
+from apps.applications.models import Application
 from apps.tenancy import catalog, classification
 from apps.tenancy.checks import RoleFacts
+from apps.tenancy.context import tenant_context
 from apps.tenancy.sql import POLICY_NAME
 from tests.canaries import plant
 
@@ -168,6 +171,60 @@ def test_the_app_role_cannot_change_the_schema():
         _execute("CREATE TABLE smuggled (id int)")
     with pytest.raises(DatabaseError, match=REFUSED), transaction.atomic():
         _execute("ALTER TABLE accounts_user ADD COLUMN extra text")
+
+
+def test_every_reference_between_tenant_tables_also_matches_the_owner():
+    problems = catalog.cross_tenant_reference_problems(
+        catalog.foreign_keys(), classification.tenant_tables()
+    )
+    assert problems == []
+    # And the rule has something to check.
+    assert any(
+        table in classification.tenant_tables() and parent in classification.tenant_tables()
+        for table, _cols, parent, _parent_cols in catalog.foreign_keys()
+        if _cols != ["user_id"]
+    )
+
+
+def test_a_reference_that_ignores_the_owner_is_reported():
+    keys = [
+        ("child", ["parent_id"], "parent", ["id"]),
+        ("child", ["user_id"], "accounts_user", ["id"]),
+        ("paired", ["parent_id"], "parent", ["id"]),
+        ("paired", ["parent_id", "user_id"], "parent", ["id", "user_id"]),
+        ("child", ["thing_id"], "shared_catalog", ["id"]),
+    ]
+    tenant = frozenset({"child", "paired", "parent"})
+    assert catalog.cross_tenant_reference_problems(keys, tenant) == [
+        "child.parent_id: references parent without matching the owner; "
+        "add sql.same_tenant_foreign_key"
+    ]
+
+
+def test_a_row_cannot_point_at_another_users_row(make_user):
+    # Postgres checks foreign keys without row-level security. The plain key alone would accept
+    # this row, and its success would tell user A that user B's row exists.
+    a, b = make_user(), make_user()
+    with tenant_context(b.pk):
+        foreign = Application.objects.create(
+            company_name="B", role_title="B", last_activity_at=date(2026, 1, 5)
+        )
+
+    def point_at_it() -> None:
+        with transaction.atomic():
+            _execute(
+                "INSERT INTO applications_applicationevent "
+                "(user_id, application_id, kind, occurred_on, text, payload, created_at) "
+                f"VALUES ({a.pk}, {foreign.pk}, 'note', '2026-01-05', '', '{{}}', now())"
+            )
+            # The key is deferred like Django's own; this checks it now instead of at commit.
+            _execute("SET CONSTRAINTS ALL IMMEDIATE")
+
+    with (
+        tenant_context(a.pk),
+        pytest.raises(DatabaseError, match="violates foreign key constraint"),
+    ):
+        point_at_it()
 
 
 # --- The same rules as one function, which `manage.py verify` runs on a deployed database

@@ -64,7 +64,10 @@ Every table is tenant, catalog or framework. The meta-test fails on a table that
 1. Inherit `apps.tenancy.models.TenantModel` (it adds the `user` foreign key).
 2. In the migration that creates the table, add `sql.enable_tenant_rls("<table>")` from
    `apps.tenancy.sql` and depend on `("tenancy", "0001_grants")`.
-3. Register a canary seeder in `backend/tests/canaries.py`.
+3. If it references another tenant table, also add `sql.same_tenant_foreign_key(...)` (and
+   `sql.tenant_key(<parent>)` in the parent's migration), so a row can only point at a row of
+   the same user. The meta-test names a reference that lacks it (ADR 0006).
+4. Register a canary seeder in `backend/tests/canaries.py`.
 
 **Adding a shared table**: inherit `CatalogModel`. It must not have a user column.
 
@@ -73,9 +76,10 @@ Every table is tenant, catalog or framework. The meta-test fails on a table that
 cannot be nested for a different user.
 
 **Adding a route**: mark the view `@demo_readable` or `@demo_denied` (`apps.accounts.demo`),
-below the route decorator. An unmarked route fails `test_route_classification`. A route with a
-path parameter also needs an example path in `backend/tests/routes.py`, so the isolation suite
-can call it. Then run `make api-types`.
+below the route decorator. An unmarked route fails `test_route_classification`. A path parameter
+must name its model in `PARAMETERS` in `backend/tests/routes.py`, so the isolation suite can call
+the route with every tenant's ids. Then run `make api-types`, and stage the two generated files
+before `make check`, which fails while they differ from the index.
 
 **Tests run as the `app` role**, the one row-level security binds. Do not change the suite to
 connect as the owner to make something pass; a test that needs the owner is testing the wrong

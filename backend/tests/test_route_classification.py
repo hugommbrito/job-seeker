@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 import pytest
 from django.http import HttpResponse
 from django.test import RequestFactory
@@ -39,7 +41,12 @@ def test_the_walk_finds_every_api_operation():
         for path, operations in schema["paths"].items()
         for method in operations
     }
-    walked = {(route.method, "/" + route.pattern) for route in all_routes() if route.is_api}
+    # The schema spells a parameter {name} where Django's pattern has <int:name>.
+    walked = {
+        (route.method, "/" + re.sub(r"<(?:\w+:)?(\w+)>", r"{\1}", route.pattern))
+        for route in all_routes()
+        if route.is_api
+    }
     assert walked == documented
     assert walked, "no API operations found"
 
@@ -55,6 +62,17 @@ def test_the_expected_decisions():
         "POST api/auth/logout": DemoAccess.READABLE,
         "GET api/auth/me": DemoAccess.READABLE,
         "GET api/profile": DemoAccess.READABLE,
+        "GET api/applications": DemoAccess.READABLE,
+        "POST api/applications": DemoAccess.DENIED,
+        "GET api/applications/<int:application_id>": DemoAccess.READABLE,
+        "PATCH api/applications/<int:application_id>": DemoAccess.DENIED,
+        "DELETE api/applications/<int:application_id>": DemoAccess.DENIED,
+        "POST api/applications/<int:application_id>/stage": DemoAccess.DENIED,
+        "POST api/applications/<int:application_id>/close": DemoAccess.DENIED,
+        "POST api/applications/<int:application_id>/reopen": DemoAccess.DENIED,
+        "POST api/applications/<int:application_id>/events": DemoAccess.DENIED,
+        "PATCH api/applications/<int:application_id>/events/<int:event_id>": DemoAccess.DENIED,
+        "DELETE api/applications/<int:application_id>/events/<int:event_id>": DemoAccess.DENIED,
         "* ^(?!api/|static/).*$": DemoAccess.READABLE,
     }
 

@@ -13,6 +13,7 @@ added and the old one gets a line pointing to it.
 | [0003](0003-first-tenant-table-in-phase-0.md) | The first per-user table ships in Phase 0 | Accepted |
 | [0004](0004-deployment-topology-on-coolify.md) | Deployment topology on Coolify | Proposed |
 | [0005](0005-web-scaffold-scope.md) | The web scaffold has no router and no service worker yet | Accepted |
+| [0006](0006-references-between-tenant-tables-match-the-owner.md) | References between tenant tables also match the owner | Accepted |
 
 ## Format
 

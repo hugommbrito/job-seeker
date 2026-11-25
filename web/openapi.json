@@ -1,6 +1,608 @@
 {
   "components": {
     "schemas": {
+      "ApplicationDetailOut": {
+        "properties": {
+          "applied_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied At"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "company_name": {
+            "title": "Company Name",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decision_due_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Due At"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/EventOut"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "last_activity_at": {
+            "format": "date",
+            "title": "Last Activity At",
+            "type": "string"
+          },
+          "last_interview_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Interview At"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "next_action": {
+            "title": "Next Action",
+            "type": "string"
+          },
+          "next_action_due": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Action Due"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Outcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "posting_snapshot": {
+            "additionalProperties": true,
+            "title": "Posting Snapshot",
+            "type": "object"
+          },
+          "posting_url": {
+            "title": "Posting Url",
+            "type": "string"
+          },
+          "role_title": {
+            "title": "Role Title",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/Stage"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "company_name",
+          "role_title",
+          "stage",
+          "outcome",
+          "posting_url",
+          "location",
+          "source",
+          "notes",
+          "applied_at",
+          "last_interview_at",
+          "decision_due_at",
+          "next_action",
+          "next_action_due",
+          "last_activity_at",
+          "created_at",
+          "updated_at",
+          "closed_at",
+          "posting_snapshot",
+          "events"
+        ],
+        "title": "ApplicationDetailOut",
+        "type": "object"
+      },
+      "ApplicationFilters": {
+        "properties": {
+          "q": {
+            "default": "",
+            "title": "Q",
+            "type": "string"
+          },
+          "sort": {
+            "default": "updated",
+            "enum": [
+              "updated",
+              "company",
+              "applied",
+              "next_action"
+            ],
+            "title": "Sort",
+            "type": "string"
+          },
+          "stage": {
+            "items": {
+              "enum": [
+                "discovered",
+                "saved",
+                "preparing",
+                "applied",
+                "recruiter",
+                "interviews",
+                "offer",
+                "accepted"
+              ],
+              "title": "Stage",
+              "type": "string"
+            },
+            "title": "Stage",
+            "type": "array"
+          },
+          "status": {
+            "default": "all",
+            "enum": [
+              "open",
+              "closed",
+              "all"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "ApplicationFilters",
+        "type": "object"
+      },
+      "ApplicationIn": {
+        "properties": {
+          "applied_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied At"
+          },
+          "closed_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed On"
+          },
+          "company_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Company Name",
+            "type": "string"
+          },
+          "last_interview_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Interview At"
+          },
+          "location": {
+            "default": "",
+            "maxLength": 200,
+            "title": "Location",
+            "type": "string"
+          },
+          "next_action": {
+            "default": "",
+            "maxLength": 300,
+            "title": "Next Action",
+            "type": "string"
+          },
+          "next_action_due": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Action Due"
+          },
+          "notes": {
+            "default": "",
+            "maxLength": 20000,
+            "title": "Notes",
+            "type": "string"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Outcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "posting_url": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Posting Url",
+            "type": "string"
+          },
+          "role_title": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Role Title",
+            "type": "string"
+          },
+          "source": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Source",
+            "type": "string"
+          },
+          "stage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Stage"
+              }
+            ],
+            "default": "saved"
+          }
+        },
+        "required": [
+          "company_name",
+          "role_title"
+        ],
+        "title": "ApplicationIn",
+        "type": "object"
+      },
+      "ApplicationOut": {
+        "properties": {
+          "applied_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied At"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "company_name": {
+            "title": "Company Name",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decision_due_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Due At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "last_activity_at": {
+            "format": "date",
+            "title": "Last Activity At",
+            "type": "string"
+          },
+          "last_interview_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Interview At"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "next_action": {
+            "title": "Next Action",
+            "type": "string"
+          },
+          "next_action_due": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Action Due"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Outcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "posting_url": {
+            "title": "Posting Url",
+            "type": "string"
+          },
+          "role_title": {
+            "title": "Role Title",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/Stage"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "company_name",
+          "role_title",
+          "stage",
+          "outcome",
+          "posting_url",
+          "location",
+          "source",
+          "notes",
+          "applied_at",
+          "last_interview_at",
+          "decision_due_at",
+          "next_action",
+          "next_action_due",
+          "last_activity_at",
+          "created_at",
+          "updated_at",
+          "closed_at"
+        ],
+        "title": "ApplicationOut",
+        "type": "object"
+      },
+      "ApplicationPatch": {
+        "properties": {
+          "applied_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied At"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "next_action": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Action"
+          },
+          "next_action_due": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Action Due"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 20000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "posting_url": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Posting Url"
+          },
+          "role_title": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Title"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "title": "ApplicationPatch",
+        "type": "object"
+      },
+      "CloseIn": {
+        "properties": {
+          "outcome": {
+            "$ref": "#/components/schemas/Outcome"
+          }
+        },
+        "required": [
+          "outcome"
+        ],
+        "title": "CloseIn",
+        "type": "object"
+      },
       "ErrorOut": {
         "properties": {
           "detail": {
@@ -12,6 +614,128 @@
           "detail"
         ],
         "title": "ErrorOut",
+        "type": "object"
+      },
+      "EventIn": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "note",
+              "interview"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "occurred_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred On"
+          },
+          "text": {
+            "default": "",
+            "maxLength": 5000,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "EventIn",
+        "type": "object"
+      },
+      "EventKind": {
+        "enum": [
+          "created",
+          "stage_changed",
+          "closed",
+          "reopened",
+          "note",
+          "interview"
+        ],
+        "title": "EventKind",
+        "type": "string"
+      },
+      "EventOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "editable": {
+            "title": "Editable",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/EventKind"
+          },
+          "occurred_on": {
+            "format": "date",
+            "title": "Occurred On",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "occurred_on",
+          "text",
+          "payload",
+          "editable",
+          "created_at"
+        ],
+        "title": "EventOut",
+        "type": "object"
+      },
+      "EventPatch": {
+        "properties": {
+          "occurred_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred On"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "title": "EventPatch",
         "type": "object"
       },
       "LoginIn": {
@@ -31,6 +755,16 @@
         ],
         "title": "LoginIn",
         "type": "object"
+      },
+      "Outcome": {
+        "description": "How an application ended without being accepted. The stage it reached is kept.",
+        "enum": [
+          "rejected",
+          "ghosted",
+          "withdrawn"
+        ],
+        "title": "Outcome",
+        "type": "string"
       },
       "ProfileOut": {
         "properties": {
@@ -53,6 +787,32 @@
         ],
         "title": "Role",
         "type": "string"
+      },
+      "Stage": {
+        "enum": [
+          "discovered",
+          "saved",
+          "preparing",
+          "applied",
+          "recruiter",
+          "interviews",
+          "offer",
+          "accepted"
+        ],
+        "title": "Stage",
+        "type": "string"
+      },
+      "StageIn": {
+        "properties": {
+          "stage": {
+            "$ref": "#/components/schemas/Stage"
+          }
+        },
+        "required": [
+          "stage"
+        ],
+        "title": "StageIn",
+        "type": "object"
       },
       "UserOut": {
         "properties": {
@@ -87,6 +847,518 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/applications": {
+      "get": {
+        "operationId": "apps_applications_api_list_applications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "enum": [
+                "open",
+                "closed",
+                "all"
+              ],
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stage",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "discovered",
+                  "saved",
+                  "preparing",
+                  "applied",
+                  "recruiter",
+                  "interviews",
+                  "offer",
+                  "accepted"
+                ],
+                "title": "Stage",
+                "type": "string"
+              },
+              "title": "Stage",
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "updated",
+              "enum": [
+                "updated",
+                "company",
+                "applied",
+                "next_action"
+              ],
+              "title": "Sort",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationOut"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "List Applications",
+        "tags": [
+          "applications"
+        ]
+      },
+      "post": {
+        "operationId": "apps_applications_api_create_application",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailOut"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Create Application",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/applications/{application_id}": {
+      "delete": {
+        "operationId": "apps_applications_api_delete_application",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Delete Application",
+        "tags": [
+          "applications"
+        ]
+      },
+      "get": {
+        "operationId": "apps_applications_api_get_application",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Get Application",
+        "tags": [
+          "applications"
+        ]
+      },
+      "patch": {
+        "operationId": "apps_applications_api_update_application",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Update Application",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/applications/{application_id}/close": {
+      "post": {
+        "operationId": "apps_applications_api_close_application",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Close Application",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/applications/{application_id}/events": {
+      "post": {
+        "operationId": "apps_applications_api_add_event",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventOut"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Add Event",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/applications/{application_id}/events/{event_id}": {
+      "delete": {
+        "operationId": "apps_applications_api_delete_event",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Delete Event",
+        "tags": [
+          "applications"
+        ]
+      },
+      "patch": {
+        "operationId": "apps_applications_api_update_event",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Update Event",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/applications/{application_id}/reopen": {
+      "post": {
+        "operationId": "apps_applications_api_reopen_application",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Reopen Application",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/applications/{application_id}/stage": {
+      "post": {
+        "operationId": "apps_applications_api_move_application",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StageIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Move Application",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
     "/api/auth/csrf": {
       "get": {
         "description": "Set the CSRF cookie. The web client calls this once before its first write.",

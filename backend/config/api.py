@@ -7,6 +7,7 @@ from ninja import NinjaAPI
 from ninja.security import django_auth
 
 from apps.accounts.api import router as auth_router
+from apps.applications.api import router as applications_router
 from apps.profiles.api import router as profile_router
 
 api = NinjaAPI(
@@ -22,3 +23,4 @@ api = NinjaAPI(
 
 api.add_router("/auth", auth_router)
 api.add_router("/profile", profile_router)
+api.add_router("/applications", applications_router)

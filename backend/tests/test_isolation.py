@@ -15,9 +15,10 @@ from django.forms.models import model_to_dict
 from django.test import Client
 
 from apps.accounts.models import Role
+from apps.applications.models import Application
 from apps.tenancy import classification
 from apps.tenancy.context import tenant_context
-from tests.canaries import SEEDERS, plant
+from tests.canaries import SEEDERS, plant, planted_ids
 from tests.routes import all_routes
 
 pytestmark = pytest.mark.django_db
@@ -88,13 +89,21 @@ def test_another_users_rows_cannot_be_changed_or_deleted(tenants):
             assert any(canary in dumped for canary in foreign), "tenant B's row was touched"
 
 
-def _crawl(client: Client) -> dict[str, str]:
-    """GET every route the server has and return what came back, headers included."""
+def _ids(tenants) -> dict[str, list[int]]:
+    return planted_ids(user for user, _canaries in tenants.values())
+
+
+def _crawl(client: Client, ids: dict[str, list[int]] | None = None) -> dict[str, str]:
+    """GET every route the server has and return what came back, headers included.
+
+    A route with a parameter is requested with the id of every planted row of its model, the
+    caller's own and everybody else's.
+    """
     seen = {}
     for route in all_routes():
         if route.method not in ("GET", "*"):
             continue
-        for path in route.paths():
+        for path in route.paths(ids):
             response = client.get(path)
             headers = "\n".join(f"{key}: {value}" for key, value in response.items())
             body = b"".join(response).decode("utf-8", errors="replace")
@@ -111,7 +120,7 @@ def _assert_absent(seen: dict[str, str], canaries: list[str], who: str) -> None:
 
 def test_no_response_to_tenant_a_contains_tenant_b_data(tenants, client_for):
     (a, own), (_b, foreign), (_demo, demo_data) = tenants["a"], tenants["b"], tenants["demo"]
-    seen = _crawl(client_for(a))
+    seen = _crawl(client_for(a), _ids(tenants))
     _assert_absent(seen, foreign + demo_data, "tenant A")
     # The crawl must reach tenant data at all, or the assertion above proves nothing.
     assert any(canary in text for text in seen.values() for canary in own)
@@ -119,14 +128,14 @@ def test_no_response_to_tenant_a_contains_tenant_b_data(tenants, client_for):
 
 def test_no_response_to_the_demo_account_contains_real_tenant_data(tenants, client_for):
     (_a, a_data), (_b, b_data), (demo, own) = tenants["a"], tenants["b"], tenants["demo"]
-    seen = _crawl(client_for(demo))
+    seen = _crawl(client_for(demo), _ids(tenants))
     _assert_absent(seen, a_data + b_data, "the demo account")
     assert any(canary in text for text in seen.values() for canary in own)
 
 
 def test_no_response_to_an_anonymous_visitor_contains_tenant_data(tenants):
     everyone = [canary for _user, canaries in tenants.values() for canary in canaries]
-    _assert_absent(_crawl(Client()), everyone, "an anonymous visitor")
+    _assert_absent(_crawl(Client(), _ids(tenants)), everyone, "an anonymous visitor")
 
 
 def test_requests_on_one_connection_do_not_inherit_the_previous_user(tenants, client_for):
@@ -137,3 +146,16 @@ def test_requests_on_one_connection_do_not_inherit_the_previous_user(tenants, cl
     assert first["timezone"] in a_data
     assert second["timezone"] in b_data
     assert Client().get("/api/profile").status_code == 401
+
+
+def test_the_crawl_requests_other_tenants_rows_by_id(tenants, client_for):
+    # Guards the crawl: a detail route must be called with ids from every tenant, or "nothing
+    # leaked" would only mean "nothing was asked for".
+    (a, _own), (b, _foreign) = tenants["a"], tenants["b"]
+    ids = _ids(tenants)
+    with tenant_context(b.pk):
+        b_application = Application.objects.values_list("pk", flat=True).first()
+    assert b_application in ids["Application"]
+    seen = _crawl(client_for(a), ids)
+    label = f"GET api/applications/<int:application_id> -> /api/applications/{b_application}"
+    assert seen[label].startswith("404")

@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "apps.tenancy",
     "apps.accounts",
     "apps.profiles",
+    "apps.applications",
     "apps.operations",
 ]
 

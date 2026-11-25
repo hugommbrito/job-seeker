@@ -55,6 +55,41 @@ def enable_tenant_rls(table: str) -> migrations.RunSQL:
     )
 
 
+def tenant_key(table: str) -> migrations.RunSQL:
+    """Let other tenant tables reference this one together with its owner: UNIQUE (id, user_id).
+
+    The primary key is already unique; this exists only as the target of
+    ``same_tenant_foreign_key``. Add it in the migration that creates the parent table.
+    """
+    ident = _identifier(table)
+    name = _identifier(f"{table}_tenant_key")
+    return migrations.RunSQL(
+        sql=f"ALTER TABLE {ident} ADD CONSTRAINT {name} UNIQUE (id, user_id)",
+        reverse_sql=f"ALTER TABLE {ident} DROP CONSTRAINT IF EXISTS {name}",
+    )
+
+
+def same_tenant_foreign_key(table: str, column: str, parent: str) -> migrations.RunSQL:
+    """Make ``table.column`` point only at a ``parent`` row owned by the same user.
+
+    Postgres checks foreign keys without applying row-level security, so the plain key Django
+    creates would accept a row of user A that points at a row of user B, and would tell A, by
+    succeeding, that B's row exists. Matching the pair (id, user_id) closes both. A NULL in the
+    column skips the check, as it does for the plain key.
+    """
+    ident, parent_ident = _identifier(table), _identifier(parent)
+    column_ident = _identifier(column)
+    name = _identifier(f"{table}_{column}_same_tenant")
+    return migrations.RunSQL(
+        sql=(
+            f"ALTER TABLE {ident} ADD CONSTRAINT {name} "
+            f"FOREIGN KEY ({column_ident}, user_id) REFERENCES {parent_ident} (id, user_id) "
+            "DEFERRABLE INITIALLY DEFERRED"
+        ),
+        reverse_sql=f"ALTER TABLE {ident} DROP CONSTRAINT IF EXISTS {name}",
+    )
+
+
 def grant_app_privileges() -> migrations.RunSQL:
     """Give the app role data access, and nothing that changes the schema.
 
