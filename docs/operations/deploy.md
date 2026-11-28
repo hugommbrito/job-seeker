@@ -4,14 +4,16 @@ How the app is deployed on a single server managed by Coolify, and how to check 
 sound. The reasoning behind the layout is in
 [ADR 0004](../adr/0004-deployment-topology-on-coolify.md).
 
-**Status on 2026-11-24: Phase 0 deployed, and section 5 passed; Phase 1 (section 7) not yet
-deployed.** (`verify`, the smoke test with two
-users and HSTS on, `make hygiene`, and a browser sign-in). Before the server existed, the image,
-`migrate` followed by `api`, the mounted credential, `api` refusing that credential and
-bootstrap-then-restore were rehearsed locally with Docker. The Coolify-specific steps were
-written from Coolify's documentation (version 4.7); the server runs 4.3.23, and the steps below
-are corrected where the first deploy found them wrong. Rows still marked **verify** were not
-checked on that deploy.
+**Status on 2026-11-27: Phase 0 deployed, sections 5 and 6 passed; Phase 1 (section 7) not yet
+deployed.** Section 5 passed on 2026-11-24: `verify`, the smoke test with two users and HSTS on,
+`make hygiene`, and a browser sign-in. Section 6 passed on 2026-11-27: backups go to an off-host
+bucket ([ADR 0012](../adr/0012-off-host-backups-on-oci-object-storage.md)), and a restore drill
+of a backup run by hand is recorded; the first scheduled run is still to be seen in the bucket.
+Before the server existed, the image, `migrate` followed by `api`, the mounted credential, `api`
+refusing that credential and bootstrap-then-restore were rehearsed locally with Docker. The
+Coolify-specific steps were written from Coolify's documentation (version 4.7); the server runs
+4.3.23, and the steps below are corrected where the first deploy found them wrong. Rows still
+marked **verify** were not checked on that deploy.
 
 ## 0. Server facts: go or no-go
 
@@ -168,18 +170,77 @@ Then open the site in a browser, sign in as each user, and confirm each sees the
 
 ## 6. Backups
 
-1. In Coolify, add an **S3 storage** whose bucket encrypts at rest, with an access key that can
-   reach that bucket only. Coolify does not encrypt the archive itself, so encryption has to be
-   a property of the destination.
-2. On the database resource, add a **scheduled backup** of the `jobseeker` database (daily),
-   enable S3, and set retention for both the local and the S3 copies.
-3. Run one backup by hand and confirm the object appears in the bucket.
-4. Do a restore drill and record it: see [restore-drills.md](restore-drills.md).
+Coolify's scheduled backup goes to a bucket on OCI Object Storage that only one key can reach
+([ADR 0012](../adr/0012-off-host-backups-on-oci-object-storage.md)). Coolify does not encrypt the
+archive, so encryption is a property of the bucket.
 
-A backup of one database is a `pg_dump` archive in custom format. It contains no roles, so
-recovery is always: create a database resource, run `bootstrap.sh`, then restore. The archive
-is taken by the database's superuser, which row-level security does not filter, so it holds
-every user's rows.
+### 6.1 The bucket and its key
+
+OCI's S3 credentials, Customer Secret Keys, act with every permission of the user that owns
+them, so the key Coolify holds belongs to a user that can do nothing else. Menus are those of
+the OCI console in English.
+
+1. **Read the root's policies first** (Identity & Security → Policies). A compartment inherits
+   every policy above it: a statement `in tenancy` that grants `objects`, `object-family`,
+   `buckets` or `all-resources` to anyone other than the administrators, with no condition on a
+   bucket's name, would reach the backups.
+2. **Compartment**: Identity & Security → Compartments → Create Compartment, `jobseeker`, under
+   the root.
+3. **Bucket**: Storage → Buckets, in that compartment and in the region the endpoint will name.
+   `jobseeker-backups`, Standard tier, auto-tiering, versioning and object events off,
+   Oracle-managed encryption. It stays private; never create a pre-authenticated request for it.
+4. **Retention rule** on the bucket: time-bound, 7 days, not locked. Nothing younger can be
+   deleted or overwritten, even with Coolify's key.
+5. **Group and user**, in the Default identity domain: a group `jobseeker-backup`, and a user in
+   it whose only capability (**Edit user capabilities**) is **Customer secret keys**. It needs
+   no password.
+6. **Policy**, attached to the root:
+
+   ```
+   Allow group jobseeker-backup to read buckets in compartment jobseeker where target.bucket.name = 'jobseeker-backups'
+   Allow group jobseeker-backup to manage objects in compartment jobseeker where target.bucket.name = 'jobseeker-backups'
+   ```
+
+   A compartment path is relative to where the policy is attached: from the root it is
+   `jobseeker`, never `<root name>:jobseeker`, which fails with "does not exist or is not part
+   of the policy compartment subtree".
+7. **Key**: on the user, **Customer secret keys → Generate secret key**. The secret is shown
+   once: paste it straight into Coolify.
+8. **Coolify → S3 Storages → Add**: the endpoint
+   `https://<namespace>.compat.objectstorage.<region>.oci.customer-oci.com` (the namespace from
+   `oci os ns get` in Cloud Shell, the region identifier from **Manage regions**), the bucket,
+   the same region identifier, and the key. Validate.
+
+| Validation fails with | Look at |
+| --- | --- |
+| `SignatureDoesNotMatch` | The region field against the endpoint's region, or the secret |
+| 404 or `NoSuchBucket` | The namespace or the bucket name; or the policy, because OCI often answers 404 where it does not authorize |
+| 403 | The group, compartment or condition in the policy, and whether the user is in the group |
+
+### 6.2 The scheduled backup
+
+1. On the database resource, add a **scheduled backup**, daily, with S3 on and the storage from
+   6.1:
+   - **Databases to back up: `jobseeker`.** The default is the resource's default database,
+     which holds nothing of the app.
+   - **Backup all databases: off.** It runs `pg_dumpall` into a compressed plain file that the
+     drill cannot read, and that carries the roles' password hashes.
+   - **Retention**: a few local copies, because the disk is shared with the images and the
+     database volume; more S3 copies than the retention rule covers, or Coolify's pruning fails
+     on protected objects.
+2. Run one backup by hand and confirm `pg-dump-jobseeker-<timestamp>-<id>.dmp` appears in the
+   bucket. Try to delete it from the console: the retention rule must refuse.
+3. Do a restore drill and record it: see [restore-drills.md](restore-drills.md). Download the
+   archive from the console, signed in as yourself.
+
+What Coolify produces, per its source and confirmed on 4.3.23 by the drill of 2026-11-27: a
+`pg_dump --format=custom` archive of the one database, owners and privileges kept, uploaded with
+the MinIO client. It contains no roles, so recovery is always: create a database resource, run
+`bootstrap.sh`, restore
+(`docker exec -i <database-container> pg_restore -U postgres -d jobseeker --exit-on-error < archive.dmp`),
+then point both DSNs (`APP_DATABASE_URL` and the file from section 2) at the new resource's
+internal host and redeploy. The archive is taken by the database's superuser, which row-level
+security does not filter, so it holds every user's rows.
 
 ## 7. Phase 1: background work, the model gateway, Telegram and the demo
 
@@ -271,9 +332,17 @@ housekeeping is overdue until its first run, a day after the first deploy at mos
 
 - **Deploy**: push to `main` and deploy from Coolify. Migrations run first, as above.
 - **Roll back**: redeploy the previous commit from Coolify. Migrations are not reversed
-  automatically; a release that needs a schema rollback says so in its commit message.
+  automatically; a release that needs a schema rollback says so in its commit message. Reverse
+  it before redeploying, with the newer image, which has the migration files:
+  `docker run --rm --network coolify -e SERVICE_NAME=migrate -e DJANGO_SECRET_KEY=unused -e DATABASE_URL_FILE=/run/secrets/migrator_database_url -v /data/job-seeker/secrets/migrator_database_url:/run/secrets/migrator_database_url:ro <image> manage migrate <app> <migration>`.
+  `SERVICE_NAME=migrate` is required: without it, `tenancy.E003` refuses the schema owner.
 - **Rotate a database password**: run `bootstrap.sh` with the new value, then update
-  `APP_DATABASE_URL` in Coolify or the file from section 2, and redeploy.
+  `APP_DATABASE_URL` in Coolify or the file from section 2, and redeploy. The script sets both
+  passwords on every run, so give the current one for the role that is not changing. Once the
+  `app` password changes, new connections fail until the redeploy is done (a connection is
+  reused for 60 s at most), so do the two back to back.
+- **Rotate the backup key**: generate a second Customer Secret Key on the backup user (a user can
+  hold two), put it in Coolify's S3 storage, validate, run a backup, then delete the old key.
 - **Housekeeping**: expired sessions, finished sign-in throttle windows and old task records are
   cleared daily by the `operations.housekeeping` task; `entrypoint manage clear_expired` does the
   first two by hand.

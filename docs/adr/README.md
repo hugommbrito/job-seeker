@@ -19,6 +19,7 @@ added and the old one gets a line pointing to it.
 | [0009](0009-first-run-wizard-scope.md) | What the first-run wizard collects in Phase 1 | Accepted |
 | [0010](0010-telegram-linking-and-delivery.md) | Telegram: linked by polling from the worker, delivered once, quiet hours per user | Accepted |
 | [0011](0011-url-capture-and-admin-move-to-phase-2.md) | Capture from a URL and the Django admin move to Phase 2 | Accepted |
+| [0012](0012-off-host-backups-on-oci-object-storage.md) | Off-host backups go to an OCI Object Storage bucket that only one key can reach | Accepted |
 
 ## Format
 
