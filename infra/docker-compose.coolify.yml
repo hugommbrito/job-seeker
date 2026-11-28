@@ -6,17 +6,32 @@
 # Postgres is NOT in this file. It is a standalone Coolify database resource, because that is
 # what Coolify's scheduled backups cover. See docs/operations/deploy.md.
 #
-# The two services run the same image with different credentials:
+# The services run the same image with different commands and credentials:
 #
-#   migrate  one-shot, runs before api starts, and is the only holder of the schema owner's
-#            credentials. Coolify gives every variable set in its UI to every service in a
-#            compose file, so that credential is deliberately not a variable: it is a file on
+#   migrate  one-shot, runs before the others start, and is the only holder of the schema
+#            owner's credentials. Coolify gives every variable set in its UI to every service in
+#            a compose file, so that credential is deliberately not a variable: it is a file on
 #            the server, mounted into this service alone.
 #   api      serves the app as the `app` role, which row-level security binds.
+#   worker   runs background tasks as the `app` role (Phase 1).
+#   beat     schedules them; exactly one instance (Phase 1).
+#   redis    the task broker; internal, password protected, nothing on disk (Phase 1).
 
 x-build: &build
   context: .
   dockerfile: infra/Dockerfile
+
+# What every Django process that serves or works needs. The broker URL carries the password.
+x-django-env: &django-env
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?}
+  # The `app` role's DSN. Every process that uses it refuses to start with a role that could
+  # bypass row-level security.
+  DATABASE_URL: ${APP_DATABASE_URL:?}
+  REDIS_URL: redis://:${REDIS_PASSWORD:?}@redis:6379/0
+  # Not secrets: the bot's public username (for link buttons) and the app's own address (for
+  # links in pushed messages). Empty turns those features off.
+  TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+  APP_BASE_URL: ${APP_BASE_URL:-}
 
 services:
   migrate:
@@ -29,6 +44,8 @@ services:
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?}
       DATABASE_URL_FILE: /run/secrets/migrator_database_url
+      # 1 rebuilds the guest's synthetic tenant after migrating, on every deploy.
+      DEMO_SEED: ${DEMO_SEED:-0}
     volumes:
       - /data/job-seeker/secrets/migrator_database_url:/run/secrets/migrator_database_url:ro
 
@@ -40,16 +57,66 @@ services:
       migrate:
         condition: service_completed_successfully
     environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?}
+      <<: *django-env
       # The public hostname, without scheme.
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?}
-      # The `app` role's DSN. The entrypoint refuses to start with any role that could bypass
-      # row-level security.
-      DATABASE_URL: ${APP_DATABASE_URL:?}
       # Coolify's proxy is the one hop that appends to X-Forwarded-For. Raise this if a CDN
       # sits in front of it.
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
       # Leave at 0 until HTTPS is confirmed working, then set a real value: browsers remember.
       DJANGO_HSTS_SECONDS: ${DJANGO_HSTS_SECONDS:-0}
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+      # Turn on only after the isolation suite and `manage.py verify` pass on this instance.
+      DEMO_LOGIN_ENABLED: ${DEMO_LOGIN_ENABLED:-0}
     # The health check is defined in the image (GET /health on port 8000).
+
+  worker:
+    build: *build
+    command: ["worker"]
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *django-env
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+      # The model gateway (infra/litellm), on the predefined network. Not a secret.
+      LLM_GATEWAY_URL: ${LLM_GATEWAY_URL:-}
+      # The worker's secrets are files in a directory mounted into this service alone, for the
+      # same reason as the migrate service's: a Coolify variable would reach the api too. A
+      # missing file leaves that feature off; nothing fails to start.
+      LLM_GATEWAY_KEY_FILE: /run/secrets/worker/llm_gateway_key
+      TELEGRAM_BOT_TOKEN_FILE: /run/secrets/worker/telegram_bot_token
+    volumes:
+      - /data/job-seeker/worker-secrets:/run/secrets/worker:ro
+    # The image's health check calls /health, which only the api serves.
+    healthcheck:
+      disable: true
+
+  beat:
+    build: *build
+    command: ["beat"]
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *django-env
+    healthcheck:
+      disable: true
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    # The queue only, so nothing is written to disk. The password matters because the
+    # predefined network is shared with every other resource on the server.
+    command: ["sh", "-c", "exec redis-server --save '' --appendonly no --requirepass \"$$REDIS_PASSWORD\""]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10

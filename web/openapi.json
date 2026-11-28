@@ -31,6 +31,13 @@
             "title": "Company Name",
             "type": "string"
           },
+          "contacts": {
+            "items": {
+              "$ref": "#/components/schemas/ContactOut"
+            },
+            "title": "Contacts",
+            "type": "array"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -47,6 +54,13 @@
               }
             ],
             "title": "Decision Due At"
+          },
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentOut"
+            },
+            "title": "Documents",
+            "type": "array"
           },
           "events": {
             "items": {
@@ -156,7 +170,9 @@
           "updated_at",
           "closed_at",
           "posting_snapshot",
-          "events"
+          "events",
+          "contacts",
+          "documents"
         ],
         "title": "ApplicationDetailOut",
         "type": "object"
@@ -591,6 +607,277 @@
         "title": "ApplicationPatch",
         "type": "object"
       },
+      "CaptureIn": {
+        "properties": {
+          "text": {
+            "maxLength": 50000,
+            "title": "Text",
+            "type": "string"
+          },
+          "url": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "CaptureIn",
+        "type": "object"
+      },
+      "CaptureOut": {
+        "properties": {
+          "application_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Application Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description_text": {
+            "title": "Description Text",
+            "type": "string"
+          },
+          "extraction_error": {
+            "title": "Extraction Error",
+            "type": "string"
+          },
+          "extraction_status": {
+            "$ref": "#/components/schemas/ExtractionStatus"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "proposal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Proposal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/CaptureSource"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "url",
+          "description_text",
+          "extraction_status",
+          "extraction_error",
+          "proposal",
+          "application_id",
+          "created_at"
+        ],
+        "title": "CaptureOut",
+        "type": "object"
+      },
+      "CaptureSaveIn": {
+        "properties": {
+          "ai_screening": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TriState"
+              }
+            ],
+            "default": "unknown"
+          },
+          "application_deadline": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Application Deadline"
+          },
+          "applied_at": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied At"
+          },
+          "company_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Company Name",
+            "type": "string"
+          },
+          "employment_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EmploymentType"
+              }
+            ],
+            "default": "unknown"
+          },
+          "existing_vacancy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TriState"
+              }
+            ],
+            "default": "unknown"
+          },
+          "location_text": {
+            "default": "",
+            "maxLength": 200,
+            "title": "Location Text",
+            "type": "string"
+          },
+          "next_action": {
+            "default": "",
+            "maxLength": 300,
+            "title": "Next Action",
+            "type": "string"
+          },
+          "next_action_due": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Action Due"
+          },
+          "notes": {
+            "default": "",
+            "maxLength": 20000,
+            "title": "Notes",
+            "type": "string"
+          },
+          "posting_url": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Posting Url",
+            "type": "string"
+          },
+          "salary_currency": {
+            "default": "",
+            "pattern": "^$|^[A-Za-z]{3}$",
+            "title": "Salary Currency",
+            "type": "string"
+          },
+          "salary_max": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Max"
+          },
+          "salary_min": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Min"
+          },
+          "salary_period": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SalaryPeriod"
+              }
+            ],
+            "default": "unknown"
+          },
+          "stage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Stage"
+              }
+            ],
+            "default": "saved"
+          },
+          "title": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "workplace_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkplaceType"
+              }
+            ],
+            "default": "unknown"
+          }
+        },
+        "required": [
+          "title",
+          "company_name"
+        ],
+        "title": "CaptureSaveIn",
+        "type": "object"
+      },
+      "CaptureSource": {
+        "enum": [
+          "paste",
+          "url"
+        ],
+        "title": "CaptureSource",
+        "type": "string"
+      },
+      "ChannelsOut": {
+        "properties": {
+          "telegram": {
+            "$ref": "#/components/schemas/TelegramOut"
+          }
+        },
+        "required": [
+          "telegram"
+        ],
+        "title": "ChannelsOut",
+        "type": "object"
+      },
       "CloseIn": {
         "properties": {
           "outcome": {
@@ -602,6 +889,239 @@
         ],
         "title": "CloseIn",
         "type": "object"
+      },
+      "ContactIn": {
+        "properties": {
+          "email": {
+            "default": "",
+            "maxLength": 254,
+            "title": "Email",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "notes": {
+            "default": "",
+            "maxLength": 5000,
+            "title": "Notes",
+            "type": "string"
+          },
+          "phone": {
+            "default": "",
+            "maxLength": 50,
+            "title": "Phone",
+            "type": "string"
+          },
+          "profile_url": {
+            "default": "",
+            "maxLength": 500,
+            "title": "Profile Url",
+            "type": "string"
+          },
+          "role": {
+            "default": "",
+            "maxLength": 200,
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ContactIn",
+        "type": "object"
+      },
+      "ContactOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "profile_url": {
+            "title": "Profile Url",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "role",
+          "email",
+          "phone",
+          "profile_url",
+          "notes",
+          "created_at"
+        ],
+        "title": "ContactOut",
+        "type": "object"
+      },
+      "ContactPatch": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "maxLength": 254,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "profile_url": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Url"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          }
+        },
+        "title": "ContactPatch",
+        "type": "object"
+      },
+      "DocumentKind": {
+        "enum": [
+          "cv",
+          "cover_letter",
+          "email",
+          "other"
+        ],
+        "title": "DocumentKind",
+        "type": "string"
+      },
+      "DocumentOut": {
+        "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DocumentKind"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "filename",
+          "content_type",
+          "size",
+          "created_at"
+        ],
+        "title": "DocumentOut",
+        "type": "object"
+      },
+      "EmploymentType": {
+        "enum": [
+          "full_time",
+          "part_time",
+          "contract",
+          "temporary",
+          "internship",
+          "unknown"
+        ],
+        "title": "EmploymentType",
+        "type": "string"
       },
       "ErrorOut": {
         "properties": {
@@ -738,6 +1258,189 @@
         "title": "EventPatch",
         "type": "object"
       },
+      "ExtractionStatus": {
+        "enum": [
+          "pending",
+          "extracted",
+          "not_evaluated"
+        ],
+        "title": "ExtractionStatus",
+        "type": "string"
+      },
+      "HardFilters": {
+        "additionalProperties": false,
+        "description": "What eliminates a posting outright. An empty list means \"any\"; nothing is assumed.",
+        "properties": {
+          "employment_types": {
+            "items": {
+              "enum": [
+                "full_time",
+                "part_time",
+                "contract",
+                "temporary",
+                "internship"
+              ],
+              "type": "string"
+            },
+            "maxItems": 5,
+            "title": "Employment Types",
+            "type": "array"
+          },
+          "locations": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Locations",
+            "type": "array"
+          },
+          "max_commute_km": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 200,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Commute Km"
+          },
+          "salary_floor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SalaryFloor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "seniority": {
+            "items": {
+              "enum": [
+                "intern",
+                "junior",
+                "intermediate",
+                "senior",
+                "staff",
+                "principal",
+                "manager",
+                "director"
+              ],
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Seniority",
+            "type": "array"
+          },
+          "workplace_types": {
+            "items": {
+              "enum": [
+                "remote",
+                "hybrid",
+                "onsite"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Workplace Types",
+            "type": "array"
+          }
+        },
+        "title": "HardFilters",
+        "type": "object"
+      },
+      "Home": {
+        "properties": {
+          "label": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Label",
+            "type": "string"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90.0,
+                "minimum": -90.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180.0,
+                "minimum": -180.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Longitude"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "title": "Home",
+        "type": "object"
+      },
+      "ImportOut": {
+        "properties": {
+          "created": {
+            "title": "Created",
+            "type": "integer"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "created",
+          "skipped",
+          "errors"
+        ],
+        "title": "ImportOut",
+        "type": "object"
+      },
+      "LinkOut": {
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "expires_at"
+        ],
+        "title": "LinkOut",
+        "type": "object"
+      },
       "LoginIn": {
         "properties": {
           "email": {
@@ -756,6 +1459,145 @@
         "title": "LoginIn",
         "type": "object"
       },
+      "NotificationOut": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "link": {
+            "title": "Link",
+            "type": "string"
+          },
+          "read": {
+            "title": "Read",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "body",
+          "link",
+          "created_at",
+          "read"
+        ],
+        "title": "NotificationOut",
+        "type": "object"
+      },
+      "NotificationsOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "unread": {
+            "title": "Unread",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "unread",
+          "items"
+        ],
+        "title": "NotificationsOut",
+        "type": "object"
+      },
+      "NotifySettings": {
+        "additionalProperties": false,
+        "properties": {
+          "follow_up_after_days": {
+            "default": 14,
+            "maximum": 90,
+            "minimum": 3,
+            "title": "Follow Up After Days",
+            "type": "integer"
+          },
+          "quiet_hours": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuietHours"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "remind_decision_due": {
+            "default": true,
+            "title": "Remind Decision Due",
+            "type": "boolean"
+          },
+          "remind_next_action": {
+            "default": true,
+            "title": "Remind Next Action",
+            "type": "boolean"
+          },
+          "remind_quiet": {
+            "default": true,
+            "title": "Remind Quiet",
+            "type": "boolean"
+          }
+        },
+        "title": "NotifySettings",
+        "type": "object"
+      },
+      "OperationsOut": {
+        "properties": {
+          "now": {
+            "format": "date-time",
+            "title": "Now",
+            "type": "string"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskStatus"
+            },
+            "title": "Tasks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "now",
+          "tasks"
+        ],
+        "title": "OperationsOut",
+        "type": "object"
+      },
+      "OptionsOut": {
+        "properties": {
+          "demo_login": {
+            "title": "Demo Login",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "demo_login"
+        ],
+        "title": "OptionsOut",
+        "type": "object"
+      },
       "Outcome": {
         "description": "How an application ended without being accepted. The stage it reached is kept.",
         "enum": [
@@ -768,15 +1610,362 @@
       },
       "ProfileOut": {
         "properties": {
+          "hard": {
+            "$ref": "#/components/schemas/HardFilters"
+          },
+          "home": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Home"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notify": {
+            "$ref": "#/components/schemas/NotifySettings"
+          },
+          "onboarded": {
+            "title": "Onboarded",
+            "type": "boolean"
+          },
           "timezone": {
             "title": "Timezone",
             "type": "string"
           }
         },
         "required": [
-          "timezone"
+          "timezone",
+          "hard",
+          "notify",
+          "home",
+          "onboarded"
         ],
         "title": "ProfileOut",
+        "type": "object"
+      },
+      "ProfilePatch": {
+        "properties": {
+          "hard": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HardFilters"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "home": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Home"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notify": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotifySettings"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "onboarded": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Onboarded"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
+          }
+        },
+        "title": "ProfilePatch",
+        "type": "object"
+      },
+      "Proposal": {
+        "additionalProperties": false,
+        "description": "The model's reading after code checked its quotes; ``issues`` names what was dropped.",
+        "properties": {
+          "ai_screening": {
+            "description": "Whether the posting says artificial intelligence is used to screen, assess or select applicants.",
+            "enum": [
+              "yes",
+              "no",
+              "unknown"
+            ],
+            "title": "Ai Screening",
+            "type": "string"
+          },
+          "ai_screening_quote": {
+            "title": "Ai Screening Quote",
+            "type": "string"
+          },
+          "application_deadline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "YYYY-MM-DD, if stated.",
+            "title": "Application Deadline"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The hiring company's name.",
+            "title": "Company"
+          },
+          "company_quote": {
+            "title": "Company Quote",
+            "type": "string"
+          },
+          "deadline_quote": {
+            "title": "Deadline Quote",
+            "type": "string"
+          },
+          "employment_quote": {
+            "title": "Employment Quote",
+            "type": "string"
+          },
+          "employment_type": {
+            "enum": [
+              "full_time",
+              "part_time",
+              "contract",
+              "temporary",
+              "internship",
+              "unknown"
+            ],
+            "title": "Employment Type",
+            "type": "string"
+          },
+          "existing_vacancy": {
+            "description": "Whether the posting says the position is an existing vacancy.",
+            "enum": [
+              "yes",
+              "no",
+              "unknown"
+            ],
+            "title": "Existing Vacancy",
+            "type": "string"
+          },
+          "existing_vacancy_quote": {
+            "title": "Existing Vacancy Quote",
+            "type": "string"
+          },
+          "issues": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "language": {
+            "description": "The language the posting is written in.",
+            "enum": [
+              "en",
+              "fr",
+              "other"
+            ],
+            "title": "Language",
+            "type": "string"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where the job is based: city, region.",
+            "title": "Location"
+          },
+          "location_quote": {
+            "title": "Location Quote",
+            "type": "string"
+          },
+          "salary_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO 4217 code, such as CAD.",
+            "title": "Salary Currency"
+          },
+          "salary_max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Max"
+          },
+          "salary_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Min"
+          },
+          "salary_period": {
+            "enum": [
+              "year",
+              "month",
+              "week",
+              "day",
+              "hour",
+              "unknown"
+            ],
+            "title": "Salary Period",
+            "type": "string"
+          },
+          "salary_quote": {
+            "title": "Salary Quote",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The job title, as the posting states it.",
+            "title": "Title"
+          },
+          "title_quote": {
+            "title": "Title Quote",
+            "type": "string"
+          },
+          "workplace_quote": {
+            "title": "Workplace Quote",
+            "type": "string"
+          },
+          "workplace_type": {
+            "enum": [
+              "remote",
+              "hybrid",
+              "onsite",
+              "unknown"
+            ],
+            "title": "Workplace Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "title_quote",
+          "company",
+          "company_quote",
+          "location",
+          "location_quote",
+          "workplace_type",
+          "workplace_quote",
+          "employment_type",
+          "employment_quote",
+          "salary_min",
+          "salary_max",
+          "salary_currency",
+          "salary_period",
+          "salary_quote",
+          "application_deadline",
+          "deadline_quote",
+          "language",
+          "ai_screening",
+          "ai_screening_quote",
+          "existing_vacancy",
+          "existing_vacancy_quote",
+          "issues"
+        ],
+        "title": "Proposal",
+        "type": "object"
+      },
+      "QuietHours": {
+        "additionalProperties": false,
+        "description": "No pushed notification between these times, in the user's timezone. May wrap midnight.",
+        "properties": {
+          "end": {
+            "format": "time",
+            "title": "End",
+            "type": "string"
+          },
+          "start": {
+            "format": "time",
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "QuietHours",
+        "type": "object"
+      },
+      "ReadIn": {
+        "properties": {
+          "ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "maxItems": 500,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ids"
+          }
+        },
+        "title": "ReadIn",
         "type": "object"
       },
       "Role": {
@@ -786,6 +1975,65 @@
           "demo"
         ],
         "title": "Role",
+        "type": "string"
+      },
+      "RunOutcome": {
+        "enum": [
+          "running",
+          "ok",
+          "error"
+        ],
+        "title": "RunOutcome",
+        "type": "string"
+      },
+      "SalaryFloor": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "currency": {
+            "default": "CAD",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency",
+            "type": "string"
+          },
+          "period": {
+            "default": "year",
+            "enum": [
+              "year",
+              "month",
+              "hour"
+            ],
+            "title": "Period",
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount"
+        ],
+        "title": "SalaryFloor",
+        "type": "object"
+      },
+      "SalaryPeriod": {
+        "enum": [
+          "year",
+          "month",
+          "week",
+          "day",
+          "hour",
+          "unknown"
+        ],
+        "title": "SalaryPeriod",
         "type": "string"
       },
       "Stage": {
@@ -814,6 +2062,352 @@
         "title": "StageIn",
         "type": "object"
       },
+      "TaskStatus": {
+        "properties": {
+          "failures_last_day": {
+            "title": "Failures Last Day",
+            "type": "integer"
+          },
+          "interval_seconds": {
+            "title": "Interval Seconds",
+            "type": "integer"
+          },
+          "last_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Last Counts",
+            "type": "object"
+          },
+          "last_error": {
+            "title": "Last Error",
+            "type": "string"
+          },
+          "last_outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunOutcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Started At"
+          },
+          "last_success_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Success At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "overdue": {
+            "title": "Overdue",
+            "type": "boolean"
+          },
+          "runs_last_day": {
+            "title": "Runs Last Day",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "interval_seconds",
+          "last_started_at",
+          "last_outcome",
+          "last_error",
+          "last_counts",
+          "last_success_at",
+          "runs_last_day",
+          "failures_last_day",
+          "overdue"
+        ],
+        "title": "TaskStatus",
+        "type": "object"
+      },
+      "TelegramOut": {
+        "properties": {
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "linked": {
+            "title": "Linked",
+            "type": "boolean"
+          },
+          "linking": {
+            "title": "Linking",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "available",
+          "linked",
+          "enabled",
+          "linking"
+        ],
+        "title": "TelegramOut",
+        "type": "object"
+      },
+      "TrackFilters": {
+        "additionalProperties": false,
+        "description": "A track's own filters, replacing the profile's where set.",
+        "properties": {
+          "locations": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locations"
+          },
+          "seniority": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "intern",
+                    "junior",
+                    "intermediate",
+                    "senior",
+                    "staff",
+                    "principal",
+                    "manager",
+                    "director"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seniority"
+          },
+          "workplace_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "remote",
+                    "hybrid",
+                    "onsite"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workplace Types"
+          }
+        },
+        "title": "TrackFilters",
+        "type": "object"
+      },
+      "TrackIn": {
+        "properties": {
+          "active": {
+            "default": true,
+            "title": "Active",
+            "type": "boolean"
+          },
+          "filter_overrides": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TrackFilters"
+              }
+            ]
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "summary": {
+            "default": "",
+            "maxLength": 5000,
+            "title": "Summary",
+            "type": "string"
+          },
+          "target_titles": {
+            "items": {
+              "maxLength": 150,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Target Titles",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "TrackIn",
+        "type": "object"
+      },
+      "TrackOut": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "filter_overrides": {
+            "$ref": "#/components/schemas/TrackFilters"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "target_titles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Titles",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "target_titles",
+          "summary",
+          "filter_overrides",
+          "active",
+          "created_at"
+        ],
+        "title": "TrackOut",
+        "type": "object"
+      },
+      "TrackPatch": {
+        "properties": {
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          },
+          "filter_overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TrackFilters"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "target_titles": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 150,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Titles"
+          }
+        },
+        "title": "TrackPatch",
+        "type": "object"
+      },
+      "TriState": {
+        "description": "A fact that may be undeterminable. Unknown never counts against a posting (rule 2).",
+        "enum": [
+          "yes",
+          "no",
+          "unknown"
+        ],
+        "title": "TriState",
+        "type": "string"
+      },
       "UserOut": {
         "properties": {
           "email": {
@@ -830,6 +2424,16 @@
         ],
         "title": "UserOut",
         "type": "object"
+      },
+      "WorkplaceType": {
+        "enum": [
+          "remote",
+          "hybrid",
+          "onsite",
+          "unknown"
+        ],
+        "title": "WorkplaceType",
+        "type": "string"
       }
     },
     "securitySchemes": {
@@ -973,6 +2577,65 @@
           }
         ],
         "summary": "Create Application",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/applications/import": {
+      "post": {
+        "description": "Import past applications from a CSV or JSON file: every row, or none and why.",
+        "operationId": "apps_applications_api_import_applications",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "title": "File",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "title": "FileParams",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportOut"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportOut"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Import Applications",
         "tags": [
           "applications"
         ]
@@ -1132,6 +2795,295 @@
         "summary": "Close Application",
         "tags": [
           "applications"
+        ]
+      }
+    },
+    "/api/applications/{application_id}/contacts": {
+      "post": {
+        "operationId": "apps_applications_api_add_contact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactOut"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Add Contact",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/applications/{application_id}/contacts/{contact_id}": {
+      "delete": {
+        "operationId": "apps_applications_api_delete_contact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "contact_id",
+            "required": true,
+            "schema": {
+              "title": "Contact Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Delete Contact",
+        "tags": [
+          "applications"
+        ]
+      },
+      "patch": {
+        "operationId": "apps_applications_api_update_contact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "contact_id",
+            "required": true,
+            "schema": {
+              "title": "Contact Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Update Contact",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/applications/{application_id}/documents": {
+      "post": {
+        "operationId": "apps_documents_api_upload_document",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "title": "File",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "allOf": [
+                      {
+                        "enum": [
+                          "cv",
+                          "cover_letter",
+                          "email",
+                          "other"
+                        ],
+                        "title": "DocumentKind",
+                        "type": "string"
+                      }
+                    ],
+                    "default": "other"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "title": "MultiPartBodyParams",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentOut"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Upload Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/applications/{application_id}/documents/{document_id}": {
+      "delete": {
+        "operationId": "apps_documents_api_delete_document",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Delete Document",
+        "tags": [
+          "documents"
+        ]
+      },
+      "get": {
+        "operationId": "apps_documents_api_download_document",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Download Document",
+        "tags": [
+          "documents"
         ]
       }
     },
@@ -1375,6 +3327,69 @@
         ]
       }
     },
+    "/api/auth/demo": {
+      "post": {
+        "description": "Sign in as the guest. Off unless DEMO_LOGIN_ENABLED, which the deploy sets only after the\nisolation suite and the catalog meta-test have passed against the instance.",
+        "operationId": "apps_accounts_api_demo_login",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Demo Login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/auth/login": {
       "post": {
         "operationId": "apps_accounts_api_login",
@@ -1484,6 +3499,431 @@
         ]
       }
     },
+    "/api/auth/options": {
+      "get": {
+        "description": "What the sign-in page may offer.",
+        "operationId": "apps_accounts_api_options",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionsOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Options",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/captures": {
+      "get": {
+        "description": "Captures not yet saved as an application, newest first.",
+        "operationId": "apps_postings_api_list_drafts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CaptureOut"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "List Drafts",
+        "tags": [
+          "captures"
+        ]
+      },
+      "post": {
+        "operationId": "apps_postings_api_create_capture",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureOut"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Create Capture",
+        "tags": [
+          "captures"
+        ]
+      }
+    },
+    "/api/captures/{capture_id}": {
+      "delete": {
+        "description": "Remove a capture. An application made from it keeps its own copy of the posting.",
+        "operationId": "apps_postings_api_discard_capture",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "capture_id",
+            "required": true,
+            "schema": {
+              "title": "Capture Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Discard Capture",
+        "tags": [
+          "captures"
+        ]
+      },
+      "get": {
+        "operationId": "apps_postings_api_get_capture",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "capture_id",
+            "required": true,
+            "schema": {
+              "title": "Capture Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Get Capture",
+        "tags": [
+          "captures"
+        ]
+      }
+    },
+    "/api/captures/{capture_id}/extract": {
+      "post": {
+        "operationId": "apps_postings_api_read_again",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "capture_id",
+            "required": true,
+            "schema": {
+              "title": "Capture Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Read Again",
+        "tags": [
+          "captures"
+        ]
+      }
+    },
+    "/api/captures/{capture_id}/save": {
+      "post": {
+        "operationId": "apps_postings_api_save_capture",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "capture_id",
+            "required": true,
+            "schema": {
+              "title": "Capture Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureSaveIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailOut"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Save Capture",
+        "tags": [
+          "captures"
+        ]
+      }
+    },
+    "/api/channels": {
+      "get": {
+        "operationId": "apps_notifications_api_list_channels",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelsOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "List Channels",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/channels/telegram": {
+      "delete": {
+        "operationId": "apps_notifications_api_unlink_telegram",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Unlink Telegram",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/channels/telegram/link": {
+      "post": {
+        "operationId": "apps_notifications_api_link_telegram",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Link Telegram",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/channels/telegram/test": {
+      "post": {
+        "operationId": "apps_notifications_api_test_telegram",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationOut"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Test Telegram",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "operationId": "apps_notifications_api_list_notifications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationsOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "List Notifications",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/notifications/read": {
+      "post": {
+        "operationId": "apps_notifications_api_mark_read",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Mark Read",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/operations": {
+      "get": {
+        "operationId": "apps_operations_api_operations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Operations",
+        "tags": [
+          "operations"
+        ]
+      }
+    },
     "/api/profile": {
       "get": {
         "operationId": "apps_profiles_api_get_profile",
@@ -1506,6 +3946,182 @@
           }
         ],
         "summary": "Get Profile",
+        "tags": [
+          "profile"
+        ]
+      },
+      "patch": {
+        "operationId": "apps_profiles_api_update_profile",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfilePatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Update Profile",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/tracks": {
+      "get": {
+        "operationId": "apps_profiles_api_list_tracks",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrackOut"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "List Tracks",
+        "tags": [
+          "profile"
+        ]
+      },
+      "post": {
+        "operationId": "apps_profiles_api_create_track",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackOut"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Create Track",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/tracks/{track_id}": {
+      "delete": {
+        "operationId": "apps_profiles_api_delete_track",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "track_id",
+            "required": true,
+            "schema": {
+              "title": "Track Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Delete Track",
+        "tags": [
+          "profile"
+        ]
+      },
+      "patch": {
+        "operationId": "apps_profiles_api_update_track",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "track_id",
+            "required": true,
+            "schema": {
+              "title": "Track Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackOut"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ],
+        "summary": "Update Track",
         "tags": [
           "profile"
         ]

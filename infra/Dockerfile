@@ -30,11 +30,14 @@ FROM python:3.14-slim AS runtime
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH" \
-    WEB_DIST_DIR=/app/web_dist
+    WEB_DIST_DIR=/app/web_dist \
+    DEMO_DIR=/app/demo
 RUN groupadd --system app && useradd --system --gid app --home-dir /app --no-create-home app
 WORKDIR /app
 COPY --from=python-deps /app/.venv /app/.venv
 COPY backend/ /app/
+# The demo persona, which the migrate service loads when DEMO_SEED=1.
+COPY demo/ /app/demo/
 COPY --from=web /src/web/dist /app/web_dist
 COPY infra/entrypoint.sh /usr/local/bin/entrypoint
 # Settings must import for collectstatic; these values are placeholders that are never used.

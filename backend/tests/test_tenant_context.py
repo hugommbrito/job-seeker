@@ -202,7 +202,8 @@ def test_isolation_holds_across_real_transactions_and_connections():
             for user_id in ids:
                 writer.execute("SELECT set_config('app.user_id', %s, true)", (str(user_id),))
                 writer.execute(
-                    "INSERT INTO profiles_profile (user_id, timezone) VALUES (%s, 'UTC')",
+                    "INSERT INTO profiles_profile (user_id, timezone, hard, notify, home_label) "
+                    "VALUES (%s, 'UTC', '{}', '{}', '')",
                     (user_id,),
                 )
                 writer.commit()

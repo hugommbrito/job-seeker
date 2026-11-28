@@ -12,6 +12,8 @@ os.environ["DJANGO_SECRET_KEY"] = "test-only"  # noqa: S105
 os.environ["DJANGO_ALLOWED_HOSTS"] = "testserver"
 os.environ["TRUSTED_PROXY_COUNT"] = "0"
 os.environ["SERVICE_NAME"] = "api"
+# Tasks run in-process, so a test that commits sees the task's effect without a broker.
+os.environ["CELERY_TASK_ALWAYS_EAGER"] = "1"
 # Lets tools that never open a connection (mypy, schema export) import the settings.
 os.environ.setdefault("DATABASE_URL", "postgres://app:unused@127.0.0.1:5433/jobseeker")
 

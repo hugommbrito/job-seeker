@@ -8,8 +8,8 @@ PNPM ?= cd web && corepack pnpm
 COMPOSE := docker compose --env-file .env -f infra/docker-compose.dev.yml
 
 .DEFAULT_GOAL := help
-.PHONY: help setup db-up db-down db-bootstrap migrate user run web test lint typecheck \
-        api-types check hygiene image
+.PHONY: help setup db-up db-down db-bootstrap migrate user run worker beat web test lint \
+        typecheck api-types check hygiene image
 
 help: ## List the commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -20,10 +20,10 @@ setup: ## One-time setup: git hooks, .env, dependencies
 	cd backend && uv sync
 	$(PNPM) install
 
-db-up: ## Start the local Postgres (roles and extensions are created on first start)
+db-up: ## Start the local Postgres and Redis (roles and extensions are created on first start)
 	$(COMPOSE) up -d --wait
 
-db-down: ## Stop the local Postgres (data is kept)
+db-down: ## Stop the local Postgres and Redis (data is kept)
 	$(COMPOSE) down
 
 db-bootstrap: ## Re-run the role bootstrap against the running local Postgres
@@ -37,6 +37,12 @@ user: ## Create a user: make user EMAIL=someone@example.org ROLE=member
 
 run: ## Run the API on :8000 (as the app role)
 	$(UV) python manage.py runserver 127.0.0.1:8000
+
+worker: ## Run the Celery worker (as the app role)
+	$(UV) sh -c 'SERVICE_NAME=worker celery -A config worker --loglevel=INFO --concurrency=2'
+
+beat: ## Run the Celery scheduler (exactly one may run)
+	$(UV) sh -c 'SERVICE_NAME=beat celery -A config beat --loglevel=INFO --schedule celerybeat-schedule'
 
 web: ## Run the web client on :5173, proxying /api to :8000
 	$(PNPM) dev

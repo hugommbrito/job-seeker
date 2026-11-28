@@ -3,7 +3,6 @@ import createClient, { type Middleware } from "openapi-fetch";
 import type { components, paths } from "./schema";
 
 export type User = components["schemas"]["UserOut"];
-export type Profile = components["schemas"]["ProfileOut"];
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS", "TRACE"]);
 const CSRF_COOKIE = "csrftoken";

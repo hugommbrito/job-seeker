@@ -7,7 +7,9 @@ serves every service and no secret is ever written to a file in the repository.
 from __future__ import annotations
 
 import os
+from datetime import timedelta
 from pathlib import Path
+from typing import Any
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -62,6 +64,11 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.profiles",
     "apps.applications",
+    "apps.postings",
+    "apps.documents",
+    "apps.llm",
+    "apps.notifications",
+    "apps.demo",
     "apps.operations",
 ]
 
@@ -166,6 +173,90 @@ SECURE_CSP = {
     "form-action": [CSP.SELF],
     "frame-ancestors": [CSP.NONE],
 }
+
+# --- Background work (Celery)
+# The broker only carries the queue; nothing that must survive a restart is kept in it.
+# The default is the local development container (infra/docker-compose.dev.yml).
+CELERY_BROKER_URL = env("REDIS_URL", "redis://127.0.0.1:6380/0")
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+# Results are written to the database by the tasks themselves.
+CELERY_TASK_IGNORE_RESULT = True
+# Acknowledged after the task finishes, so one interrupted by a restart runs again. Every task
+# is written to be safe to repeat.
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_SOFT_TIME_LIMIT = 4 * 60
+CELERY_TASK_TIME_LIMIT = 5 * 60
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_ALWAYS_EAGER = env_bool("CELERY_TASK_ALWAYS_EAGER")
+CELERY_TASK_EAGER_PROPAGATES = CELERY_TASK_ALWAYS_EAGER
+# What beat runs, and how often. `interval` is also how /api/operations decides that a task is
+# overdue, so it is kept next to the schedule it describes.
+SCHEDULED_TASKS: dict[str, dict[str, Any]] = {
+    "operations.housekeeping": {"interval": timedelta(hours=24)},
+    "postings.sweep_stalled_captures": {"interval": timedelta(minutes=10)},
+    # Linking a chat waits for this; a minute is the longest a person should have to wait.
+    "notifications.poll_telegram": {"interval": timedelta(minutes=1)},
+    "notifications.deliver": {"interval": timedelta(minutes=5)},
+    # Reminders are about dates; a quarter of an hour after one comes due is soon enough.
+    "notifications.scan_reminders": {"interval": timedelta(minutes=15)},
+}
+CELERY_BEAT_SCHEDULE = {
+    name: {"task": name, "schedule": spec["interval"]} for name, spec in SCHEDULED_TASKS.items()
+}
+
+# --- Model gateway (apps.llm)
+# LiteLLM's Anthropic-format endpoint, which only the worker can reach. Empty means there is no
+# gateway: model tasks are recorded as not evaluated and nothing else changes (rule 8). The key
+# is read when a call is made, from LLM_GATEWAY_KEY or the file LLM_GATEWAY_KEY_FILE names.
+LLM_GATEWAY_URL = env("LLM_GATEWAY_URL", "")
+# The model each task asks the gateway for (an alias in infra/litellm/config.yaml), its effort
+# and its output limit. Thinking is adaptive everywhere and counts toward max_tokens.
+LLM_TASKS: dict[str, dict[str, Any]] = {
+    "extractor": {"model": env("LLM_MODEL_EXTRACTOR", "extractor"), "effort": "low"},
+    "fit-judge": {"model": env("LLM_MODEL_FIT_JUDGE", "fit-judge"), "effort": "medium"},
+    "email-classifier": {
+        "model": env("LLM_MODEL_EMAIL_CLASSIFIER", "email-classifier"),
+        "effort": "low",
+    },
+    "writer": {"model": env("LLM_MODEL_WRITER", "writer"), "effort": "high"},
+}
+for _task in LLM_TASKS.values():
+    _task.setdefault("max_tokens", 16000)
+LLM_TIMEOUT_SECONDS = float(env("LLM_TIMEOUT_SECONDS", "120"))
+# Calls that reached the model, per user, in any 24 hours. A backstop under the gateway's own
+# budget; Phase 2 adds its daily cap of judged postings on top.
+LLM_DAILY_CALLS_PER_USER = int(env("LLM_DAILY_CALLS_PER_USER", "100"))
+# Server-side refusal fallbacks. Off until the gateway spike shows LiteLLM forwards them.
+LLM_REFUSAL_FALLBACKS = env_bool("LLM_REFUSAL_FALLBACKS")
+# How a call is priced when the gateway reports an alias instead of a model id.
+LLM_PRICED_AS = env("LLM_PRICED_AS", "claude-opus-5-5")
+
+# --- Notifications
+# The bot's public username, which the api needs to build a link. Its token is the worker's
+# alone: TELEGRAM_BOT_TOKEN, or the file TELEGRAM_BOT_TOKEN_FILE names (apps.notifications).
+TELEGRAM_BOT_USERNAME = env("TELEGRAM_BOT_USERNAME", "")
+# The public address of the app, for links in pushed messages. Empty sends no link.
+APP_BASE_URL = env("APP_BASE_URL", "")
+
+# Every outbound request names the app (project rule 7). Add a contact address at deploy time.
+HTTP_USER_AGENT = env("HTTP_USER_AGENT", "job-seeker/0.1 (self-hosted job-search assistant)")
+
+# --- The demo tenant and the guest login
+# The synthetic persona the guest sees, rebuilt by `manage.py seed_demo` (demo/ in the repository).
+DEMO_DIR = Path(env("DEMO_DIR", str(BASE_DIR.parent / "demo")))
+DEMO_EMAIL = env("DEMO_EMAIL", "guest@demo.invalid")
+# Off by default: the plan allows the guest in only once the isolation suite and the meta-test
+# pass on the deployed instance.
+DEMO_LOGIN_ENABLED = env_bool("DEMO_LOGIN_ENABLED")
+DEMO_SESSION_SECONDS = 2 * 60 * 60
+DEMO_LOGINS_PER_ADDRESS = 10
+
+# --- Documents
+# Where uploaded documents' bytes are kept (apps.documents.store), and the largest accepted.
+DOCUMENT_STORE = "apps.documents.store.DatabaseStore"
+DOCUMENT_MAX_BYTES = 10 * 1024 * 1024
 
 # --- Static files and the single-page app
 STATIC_URL = "static/"

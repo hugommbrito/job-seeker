@@ -69,6 +69,14 @@ class Application(TenantModel):
 
     # A frozen copy of the posting as it was when the application was made.
     posting_snapshot = models.JSONField(default=dict, blank=True)
+    # The capture it was made from. Losing it loses nothing: the snapshot is the record.
+    user_posting = models.ForeignKey(
+        "postings.UserPosting",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="applications",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -129,3 +137,20 @@ class ApplicationEvent(TenantModel):
     @property
     def editable(self) -> bool:
         return self.kind in USER_EVENT_KINDS
+
+
+class Contact(TenantModel):
+    """Someone at the company or agency, for one application."""
+
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name="contacts")
+    name = models.CharField(max_length=200)
+    role = models.CharField(max_length=200, blank=True, default="")
+    email = models.EmailField(blank=True, default="")
+    phone = models.CharField(max_length=50, blank=True, default="")
+    profile_url = models.URLField(max_length=500, blank=True, default="")
+    notes = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        # Not the name or the address: this ends up in logs.
+        return f"contact {self.pk}"

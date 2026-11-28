@@ -44,6 +44,8 @@ class NewApplication:
     # When an application recorded after the fact was closed; today when not given.
     closed_on: date | None = None
     posting_snapshot: dict[str, Any] = field(default_factory=dict)
+    # The capture it was made from, if any.
+    user_posting_id: int | None = None
 
 
 def _record(
@@ -98,6 +100,7 @@ def create_application(data: NewApplication) -> Application:
         next_action_due=data.next_action_due,
         last_activity_at=today,
         posting_snapshot=data.posting_snapshot,
+        user_posting_id=data.user_posting_id,
     )
     application.full_clean(exclude=["user"])
     application.save()

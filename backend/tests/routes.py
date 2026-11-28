@@ -31,6 +31,10 @@ EXAMPLE_PATHS: dict[str, list[str]] = {
 PARAMETERS: dict[str, str] = {
     "application_id": "Application",
     "event_id": "ApplicationEvent",
+    "contact_id": "Contact",
+    "document_id": "Document",
+    "capture_id": "UserPosting",
+    "track_id": "Track",
 }
 
 _PARAMETER = re.compile(r"<(?:\w+:)?(?P<name>\w+)>")

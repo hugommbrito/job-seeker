@@ -22,6 +22,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/applications/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Applications
+         * @description Import past applications from a CSV or JSON file: every row, or none and why.
+         */
+        post: operations["apps_applications_api_import_applications"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/applications/{application_id}": {
         parameters: {
             query?: never;
@@ -53,6 +73,76 @@ export interface paths {
         /** Close Application */
         post: operations["apps_applications_api_close_application"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application_id}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Contact */
+        post: operations["apps_applications_api_add_contact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application_id}/contacts/{contact_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Contact */
+        delete: operations["apps_applications_api_delete_contact"];
+        options?: never;
+        head?: never;
+        /** Update Contact */
+        patch: operations["apps_applications_api_update_contact"];
+        trace?: never;
+    };
+    "/api/applications/{application_id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Document */
+        post: operations["apps_documents_api_upload_document"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application_id}/documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Document */
+        get: operations["apps_documents_api_download_document"];
+        put?: never;
+        post?: never;
+        /** Delete Document */
+        delete: operations["apps_documents_api_delete_document"];
         options?: never;
         head?: never;
         patch?: never;
@@ -147,6 +237,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/demo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Demo Login
+         * @description Sign in as the guest. Off unless DEMO_LOGIN_ENABLED, which the deploy sets only after the
+         *     isolation suite and the catalog meta-test have passed against the instance.
+         */
+        post: operations["apps_accounts_api_demo_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login": {
         parameters: {
             query?: never;
@@ -198,6 +309,221 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Options
+         * @description What the sign-in page may offer.
+         */
+        get: operations["apps_accounts_api_options"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/captures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Drafts
+         * @description Captures not yet saved as an application, newest first.
+         */
+        get: operations["apps_postings_api_list_drafts"];
+        put?: never;
+        /** Create Capture */
+        post: operations["apps_postings_api_create_capture"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/captures/{capture_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Capture */
+        get: operations["apps_postings_api_get_capture"];
+        put?: never;
+        post?: never;
+        /**
+         * Discard Capture
+         * @description Remove a capture. An application made from it keeps its own copy of the posting.
+         */
+        delete: operations["apps_postings_api_discard_capture"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/captures/{capture_id}/extract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read Again */
+        post: operations["apps_postings_api_read_again"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/captures/{capture_id}/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save Capture */
+        post: operations["apps_postings_api_save_capture"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Channels */
+        get: operations["apps_notifications_api_list_channels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/channels/telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Unlink Telegram */
+        delete: operations["apps_notifications_api_unlink_telegram"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/channels/telegram/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Link Telegram */
+        post: operations["apps_notifications_api_link_telegram"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/channels/telegram/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test Telegram */
+        post: operations["apps_notifications_api_test_telegram"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Notifications */
+        get: operations["apps_notifications_api_list_notifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Read */
+        post: operations["apps_notifications_api_mark_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Operations */
+        get: operations["apps_operations_api_operations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/profile": {
         parameters: {
             query?: never;
@@ -212,7 +538,44 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /** Update Profile */
+        patch: operations["apps_profiles_api_update_profile"];
+        trace?: never;
+    };
+    "/api/tracks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Tracks */
+        get: operations["apps_profiles_api_list_tracks"];
+        put?: never;
+        /** Create Track */
+        post: operations["apps_profiles_api_create_track"];
+        delete?: never;
+        options?: never;
+        head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/tracks/{track_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Track */
+        delete: operations["apps_profiles_api_delete_track"];
+        options?: never;
+        head?: never;
+        /** Update Track */
+        patch: operations["apps_profiles_api_update_track"];
         trace?: never;
     };
 }
@@ -227,6 +590,8 @@ export interface components {
             closed_at: string | null;
             /** Company Name */
             company_name: string;
+            /** Contacts */
+            contacts: components["schemas"]["ContactOut"][];
             /**
              * Created At
              * Format: date-time
@@ -234,6 +599,8 @@ export interface components {
             created_at: string;
             /** Decision Due At */
             decision_due_at: string | null;
+            /** Documents */
+            documents: components["schemas"]["DocumentOut"][];
             /** Events */
             events: components["schemas"]["EventOut"][];
             /** Id */
@@ -403,10 +770,198 @@ export interface components {
             /** Source */
             source?: string | null;
         };
+        /** CaptureIn */
+        CaptureIn: {
+            /** Text */
+            text: string;
+            /**
+             * Url
+             * @default
+             */
+            url: string;
+        };
+        /** CaptureOut */
+        CaptureOut: {
+            /** Application Id */
+            application_id: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description Text */
+            description_text: string;
+            /** Extraction Error */
+            extraction_error: string;
+            extraction_status: components["schemas"]["ExtractionStatus"];
+            /** Id */
+            id: number;
+            proposal: components["schemas"]["Proposal"] | null;
+            source: components["schemas"]["CaptureSource"];
+            /** Url */
+            url: string;
+        };
+        /** CaptureSaveIn */
+        CaptureSaveIn: {
+            /** @default unknown */
+            ai_screening: components["schemas"]["TriState"];
+            /** Application Deadline */
+            application_deadline?: string | null;
+            /** Applied At */
+            applied_at?: string | null;
+            /** Company Name */
+            company_name: string;
+            /** @default unknown */
+            employment_type: components["schemas"]["EmploymentType"];
+            /** @default unknown */
+            existing_vacancy: components["schemas"]["TriState"];
+            /**
+             * Location Text
+             * @default
+             */
+            location_text: string;
+            /**
+             * Next Action
+             * @default
+             */
+            next_action: string;
+            /** Next Action Due */
+            next_action_due?: string | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Posting Url
+             * @default
+             */
+            posting_url: string;
+            /**
+             * Salary Currency
+             * @default
+             */
+            salary_currency: string;
+            /** Salary Max */
+            salary_max?: number | string | null;
+            /** Salary Min */
+            salary_min?: number | string | null;
+            /** @default unknown */
+            salary_period: components["schemas"]["SalaryPeriod"];
+            /** @default saved */
+            stage: components["schemas"]["Stage"];
+            /** Title */
+            title: string;
+            /** @default unknown */
+            workplace_type: components["schemas"]["WorkplaceType"];
+        };
+        /**
+         * CaptureSource
+         * @enum {string}
+         */
+        CaptureSource: "paste" | "url";
+        /** ChannelsOut */
+        ChannelsOut: {
+            telegram: components["schemas"]["TelegramOut"];
+        };
         /** CloseIn */
         CloseIn: {
             outcome: components["schemas"]["Outcome"];
         };
+        /** ContactIn */
+        ContactIn: {
+            /**
+             * Email
+             * @default
+             */
+            email: string;
+            /** Name */
+            name: string;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Profile Url
+             * @default
+             */
+            profile_url: string;
+            /**
+             * Role
+             * @default
+             */
+            role: string;
+        };
+        /** ContactOut */
+        ContactOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Email */
+            email: string;
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Notes */
+            notes: string;
+            /** Phone */
+            phone: string;
+            /** Profile Url */
+            profile_url: string;
+            /** Role */
+            role: string;
+        };
+        /** ContactPatch */
+        ContactPatch: {
+            /** Email */
+            email?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Profile Url */
+            profile_url?: string | null;
+            /** Role */
+            role?: string | null;
+        };
+        /**
+         * DocumentKind
+         * @enum {string}
+         */
+        DocumentKind: "cv" | "cover_letter" | "email" | "other";
+        /** DocumentOut */
+        DocumentOut: {
+            /** Content Type */
+            content_type: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Filename */
+            filename: string;
+            /** Id */
+            id: number;
+            kind: components["schemas"]["DocumentKind"];
+            /** Size */
+            size: number;
+        };
+        /**
+         * EmploymentType
+         * @enum {string}
+         */
+        EmploymentType: "full_time" | "part_time" | "contract" | "temporary" | "internship" | "unknown";
         /** ErrorOut */
         ErrorOut: {
             /** Detail */
@@ -463,12 +1018,131 @@ export interface components {
             /** Text */
             text?: string | null;
         };
+        /**
+         * ExtractionStatus
+         * @enum {string}
+         */
+        ExtractionStatus: "pending" | "extracted" | "not_evaluated";
+        /**
+         * HardFilters
+         * @description What eliminates a posting outright. An empty list means "any"; nothing is assumed.
+         */
+        HardFilters: {
+            /** Employment Types */
+            employment_types?: ("full_time" | "part_time" | "contract" | "temporary" | "internship")[];
+            /** Locations */
+            locations?: string[];
+            /** Max Commute Km */
+            max_commute_km?: number | null;
+            salary_floor?: components["schemas"]["SalaryFloor"] | null;
+            /** Seniority */
+            seniority?: ("intern" | "junior" | "intermediate" | "senior" | "staff" | "principal" | "manager" | "director")[];
+            /** Workplace Types */
+            workplace_types?: ("remote" | "hybrid" | "onsite")[];
+        };
+        /** Home */
+        Home: {
+            /**
+             * Label
+             * @default
+             */
+            label: string;
+            /** Latitude */
+            latitude: number | string;
+            /** Longitude */
+            longitude: number | string;
+        };
+        /** ImportOut */
+        ImportOut: {
+            /** Created */
+            created: number;
+            /** Errors */
+            errors: string[];
+            /** Skipped */
+            skipped: number;
+        };
+        /** LinkOut */
+        LinkOut: {
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Url */
+            url: string;
+        };
         /** LoginIn */
         LoginIn: {
             /** Email */
             email: string;
             /** Password */
             password: string;
+        };
+        /** NotificationOut */
+        NotificationOut: {
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /** Link */
+            link: string;
+            /** Read */
+            read: boolean;
+            /** Title */
+            title: string;
+        };
+        /** NotificationsOut */
+        NotificationsOut: {
+            /** Items */
+            items: components["schemas"]["NotificationOut"][];
+            /** Unread */
+            unread: number;
+        };
+        /** NotifySettings */
+        NotifySettings: {
+            /**
+             * Follow Up After Days
+             * @default 14
+             */
+            follow_up_after_days: number;
+            quiet_hours?: components["schemas"]["QuietHours"] | null;
+            /**
+             * Remind Decision Due
+             * @default true
+             */
+            remind_decision_due: boolean;
+            /**
+             * Remind Next Action
+             * @default true
+             */
+            remind_next_action: boolean;
+            /**
+             * Remind Quiet
+             * @default true
+             */
+            remind_quiet: boolean;
+        };
+        /** OperationsOut */
+        OperationsOut: {
+            /**
+             * Now
+             * Format: date-time
+             */
+            now: string;
+            /** Tasks */
+            tasks: components["schemas"]["TaskStatus"][];
+        };
+        /** OptionsOut */
+        OptionsOut: {
+            /** Demo Login */
+            demo_login: boolean;
         };
         /**
          * Outcome
@@ -478,14 +1152,164 @@ export interface components {
         Outcome: "rejected" | "ghosted" | "withdrawn";
         /** ProfileOut */
         ProfileOut: {
+            hard: components["schemas"]["HardFilters"];
+            home: components["schemas"]["Home"] | null;
+            notify: components["schemas"]["NotifySettings"];
+            /** Onboarded */
+            onboarded: boolean;
             /** Timezone */
             timezone: string;
+        };
+        /** ProfilePatch */
+        ProfilePatch: {
+            hard?: components["schemas"]["HardFilters"] | null;
+            home?: components["schemas"]["Home"] | null;
+            notify?: components["schemas"]["NotifySettings"] | null;
+            /** Onboarded */
+            onboarded?: boolean | null;
+            /** Timezone */
+            timezone?: string | null;
+        };
+        /**
+         * Proposal
+         * @description The model's reading after code checked its quotes; ``issues`` names what was dropped.
+         */
+        Proposal: {
+            /**
+             * Ai Screening
+             * @description Whether the posting says artificial intelligence is used to screen, assess or select applicants.
+             * @enum {string}
+             */
+            ai_screening: "yes" | "no" | "unknown";
+            /** Ai Screening Quote */
+            ai_screening_quote: string;
+            /**
+             * Application Deadline
+             * @description YYYY-MM-DD, if stated.
+             */
+            application_deadline: string | null;
+            /**
+             * Company
+             * @description The hiring company's name.
+             */
+            company: string | null;
+            /** Company Quote */
+            company_quote: string;
+            /** Deadline Quote */
+            deadline_quote: string;
+            /** Employment Quote */
+            employment_quote: string;
+            /**
+             * Employment Type
+             * @enum {string}
+             */
+            employment_type: "full_time" | "part_time" | "contract" | "temporary" | "internship" | "unknown";
+            /**
+             * Existing Vacancy
+             * @description Whether the posting says the position is an existing vacancy.
+             * @enum {string}
+             */
+            existing_vacancy: "yes" | "no" | "unknown";
+            /** Existing Vacancy Quote */
+            existing_vacancy_quote: string;
+            /** Issues */
+            issues: string[];
+            /**
+             * Language
+             * @description The language the posting is written in.
+             * @enum {string}
+             */
+            language: "en" | "fr" | "other";
+            /**
+             * Location
+             * @description Where the job is based: city, region.
+             */
+            location: string | null;
+            /** Location Quote */
+            location_quote: string;
+            /**
+             * Salary Currency
+             * @description ISO 4217 code, such as CAD.
+             */
+            salary_currency: string | null;
+            /** Salary Max */
+            salary_max: number | null;
+            /** Salary Min */
+            salary_min: number | null;
+            /**
+             * Salary Period
+             * @enum {string}
+             */
+            salary_period: "year" | "month" | "week" | "day" | "hour" | "unknown";
+            /** Salary Quote */
+            salary_quote: string;
+            /**
+             * Title
+             * @description The job title, as the posting states it.
+             */
+            title: string | null;
+            /** Title Quote */
+            title_quote: string;
+            /** Workplace Quote */
+            workplace_quote: string;
+            /**
+             * Workplace Type
+             * @enum {string}
+             */
+            workplace_type: "remote" | "hybrid" | "onsite" | "unknown";
+        };
+        /**
+         * QuietHours
+         * @description No pushed notification between these times, in the user's timezone. May wrap midnight.
+         */
+        QuietHours: {
+            /**
+             * End
+             * Format: time
+             */
+            end: string;
+            /**
+             * Start
+             * Format: time
+             */
+            start: string;
+        };
+        /** ReadIn */
+        ReadIn: {
+            /** Ids */
+            ids?: number[] | null;
         };
         /**
          * Role
          * @enum {string}
          */
         Role: "owner" | "member" | "demo";
+        /**
+         * RunOutcome
+         * @enum {string}
+         */
+        RunOutcome: "running" | "ok" | "error";
+        /** SalaryFloor */
+        SalaryFloor: {
+            /** Amount */
+            amount: number | string;
+            /**
+             * Currency
+             * @default CAD
+             */
+            currency: string;
+            /**
+             * Period
+             * @default year
+             * @enum {string}
+             */
+            period: "year" | "month" | "hour";
+        };
+        /**
+         * SalaryPeriod
+         * @enum {string}
+         */
+        SalaryPeriod: "year" | "month" | "week" | "day" | "hour" | "unknown";
         /**
          * Stage
          * @enum {string}
@@ -495,12 +1319,119 @@ export interface components {
         StageIn: {
             stage: components["schemas"]["Stage"];
         };
+        /** TaskStatus */
+        TaskStatus: {
+            /** Failures Last Day */
+            failures_last_day: number;
+            /** Interval Seconds */
+            interval_seconds: number;
+            /** Last Counts */
+            last_counts: {
+                [key: string]: number;
+            };
+            /** Last Error */
+            last_error: string;
+            last_outcome: components["schemas"]["RunOutcome"] | null;
+            /** Last Started At */
+            last_started_at: string | null;
+            /** Last Success At */
+            last_success_at: string | null;
+            /** Name */
+            name: string;
+            /** Overdue */
+            overdue: boolean;
+            /** Runs Last Day */
+            runs_last_day: number;
+        };
+        /** TelegramOut */
+        TelegramOut: {
+            /** Available */
+            available: boolean;
+            /** Enabled */
+            enabled: boolean;
+            /** Linked */
+            linked: boolean;
+            /** Linking */
+            linking: boolean;
+        };
+        /**
+         * TrackFilters
+         * @description A track's own filters, replacing the profile's where set.
+         */
+        TrackFilters: {
+            /** Locations */
+            locations?: string[] | null;
+            /** Seniority */
+            seniority?: ("intern" | "junior" | "intermediate" | "senior" | "staff" | "principal" | "manager" | "director")[] | null;
+            /** Workplace Types */
+            workplace_types?: ("remote" | "hybrid" | "onsite")[] | null;
+        };
+        /** TrackIn */
+        TrackIn: {
+            /**
+             * Active
+             * @default true
+             */
+            active: boolean;
+            filter_overrides?: components["schemas"]["TrackFilters"];
+            /** Name */
+            name: string;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /** Target Titles */
+            target_titles?: string[];
+        };
+        /** TrackOut */
+        TrackOut: {
+            /** Active */
+            active: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            filter_overrides: components["schemas"]["TrackFilters"];
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Summary */
+            summary: string;
+            /** Target Titles */
+            target_titles: string[];
+        };
+        /** TrackPatch */
+        TrackPatch: {
+            /** Active */
+            active?: boolean | null;
+            filter_overrides?: components["schemas"]["TrackFilters"] | null;
+            /** Name */
+            name?: string | null;
+            /** Summary */
+            summary?: string | null;
+            /** Target Titles */
+            target_titles?: string[] | null;
+        };
+        /**
+         * TriState
+         * @description A fact that may be undeterminable. Unknown never counts against a posting (rule 2).
+         * @enum {string}
+         */
+        TriState: "yes" | "no" | "unknown";
         /** UserOut */
         UserOut: {
             /** Email */
             email: string;
             role: components["schemas"]["Role"];
         };
+        /**
+         * WorkplaceType
+         * @enum {string}
+         */
+        WorkplaceType: "remote" | "hybrid" | "onsite" | "unknown";
     };
     responses: never;
     parameters: never;
@@ -555,6 +1486,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApplicationDetailOut"];
+                };
+            };
+        };
+    };
+    apps_applications_api_import_applications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * File
+                     * Format: binary
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportOut"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportOut"];
                 };
             };
         };
@@ -650,6 +1620,156 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApplicationDetailOut"];
                 };
+            };
+        };
+    };
+    apps_applications_api_add_contact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactIn"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactOut"];
+                };
+            };
+        };
+    };
+    apps_applications_api_delete_contact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    apps_applications_api_update_contact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactPatch"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactOut"];
+                };
+            };
+        };
+    };
+    apps_documents_api_upload_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * File
+                     * Format: binary
+                     */
+                    file: string;
+                    /** @default other */
+                    kind?: "cv" | "cover_letter" | "email" | "other";
+                };
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentOut"];
+                };
+            };
+        };
+    };
+    apps_documents_api_download_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+                document_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    apps_documents_api_delete_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: number;
+                document_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -793,6 +1913,62 @@ export interface operations {
             };
         };
     };
+    apps_accounts_api_demo_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserOut"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
     apps_accounts_api_login: {
         parameters: {
             query?: never;
@@ -882,6 +2058,300 @@ export interface operations {
             };
         };
     };
+    apps_accounts_api_options: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OptionsOut"];
+                };
+            };
+        };
+    };
+    apps_postings_api_list_drafts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaptureOut"][];
+                };
+            };
+        };
+    };
+    apps_postings_api_create_capture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaptureIn"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaptureOut"];
+                };
+            };
+        };
+    };
+    apps_postings_api_get_capture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                capture_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaptureOut"];
+                };
+            };
+        };
+    };
+    apps_postings_api_discard_capture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                capture_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    apps_postings_api_read_again: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                capture_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaptureOut"];
+                };
+            };
+        };
+    };
+    apps_postings_api_save_capture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                capture_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaptureSaveIn"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDetailOut"];
+                };
+            };
+        };
+    };
+    apps_notifications_api_list_channels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelsOut"];
+                };
+            };
+        };
+    };
+    apps_notifications_api_unlink_telegram: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    apps_notifications_api_link_telegram: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkOut"];
+                };
+            };
+        };
+    };
+    apps_notifications_api_test_telegram: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationOut"];
+                };
+            };
+        };
+    };
+    apps_notifications_api_list_notifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationsOut"];
+                };
+            };
+        };
+    };
+    apps_notifications_api_mark_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadIn"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    apps_operations_api_operations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationsOut"];
+                };
+            };
+        };
+    };
     apps_profiles_api_get_profile: {
         parameters: {
             query?: never;
@@ -898,6 +2368,120 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+        };
+    };
+    apps_profiles_api_update_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfilePatch"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+        };
+    };
+    apps_profiles_api_list_tracks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrackOut"][];
+                };
+            };
+        };
+    };
+    apps_profiles_api_create_track: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrackIn"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrackOut"];
+                };
+            };
+        };
+    };
+    apps_profiles_api_delete_track: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                track_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    apps_profiles_api_update_track: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                track_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrackPatch"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrackOut"];
                 };
             };
         };

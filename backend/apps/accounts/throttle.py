@@ -95,3 +95,37 @@ def record_success(email: str, address: str) -> None:
 def clear_expired() -> int:
     deleted, _ = LoginThrottle.objects.filter(window_start__lte=timezone.now() - _window()).delete()
     return deleted
+
+
+# --- The guest login. Every success counts, per address: signing in as the guest is free, so
+# the limit is what stops one address from filling the session table.
+
+
+def _demo_key(address: str) -> str:
+    return _key("demo", address)
+
+
+def demo_wait(address: str) -> int:
+    row = LoginThrottle.objects.filter(key=_demo_key(address)).first()
+    if row is None:
+        return 0
+    expires = row.window_start + _window()
+    now = timezone.now()
+    if row.failures >= settings.DEMO_LOGINS_PER_ADDRESS and expires > now:
+        return int((expires - now).total_seconds()) + 1
+    return 0
+
+
+def record_demo(address: str) -> None:
+    now = timezone.now()
+    with transaction.atomic():
+        row, created = LoginThrottle.objects.select_for_update().get_or_create(
+            key=_demo_key(address), defaults={"failures": 1, "window_start": now}
+        )
+        if created:
+            return
+        if row.window_start + _window() <= now:
+            row.failures, row.window_start = 1, now
+        else:
+            row.failures += 1
+        row.save(update_fields=["failures", "window_start"])

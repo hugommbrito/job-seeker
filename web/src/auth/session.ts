@@ -54,3 +54,27 @@ export function useLogout() {
     onSettled: () => endSession(queryClient),
   });
 }
+
+/** Whether the sign-in page may offer the guest login. */
+export function useSignInOptions() {
+  return useQuery({
+    queryKey: ["sign-in-options"],
+    queryFn: async () => {
+      const { data } = await api.GET("/api/auth/options");
+      return data ?? { demo_login: false };
+    },
+    staleTime: Infinity,
+  });
+}
+
+export function useDemoLogin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (): Promise<User> => {
+      const { data, error, response } = await api.POST("/api/auth/demo");
+      if (!data) throw new ApiError(response.status, error?.detail ?? "The demo is not available.");
+      return data;
+    },
+    onSuccess: (user) => queryClient.setQueryData(SESSION_KEY, user),
+  });
+}

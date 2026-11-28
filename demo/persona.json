@@ -1,0 +1,135 @@
+{
+  "about": "A synthetic persona for the public demo. Every company is fictional and every person is invented. Dates such as -12d are relative to the day the demo is rebuilt.",
+  "profile": {
+    "timezone": "America/Toronto",
+    "hard": {
+      "workplace_types": ["remote", "hybrid"],
+      "locations": ["Toronto"],
+      "salary_floor": {"amount": "75000", "currency": "CAD", "period": "year"},
+      "employment_types": ["full_time"]
+    },
+    "notify": {"follow_up_after_days": 14},
+    "home": {"label": "Union Station, a public landmark", "latitude": "43.645200", "longitude": "-79.380600"}
+  },
+  "tracks": [
+    {
+      "name": "Data analysis",
+      "target_titles": ["Data Analyst", "Business Intelligence Analyst", "Reporting Analyst"],
+      "summary": "Four years of reporting and dashboards for retail operations; SQL and spreadsheet modelling."
+    },
+    {
+      "name": "Product operations",
+      "target_titles": ["Product Operations Specialist", "Operations Analyst"],
+      "summary": "Moving from analysis toward running the processes the analysis describes."
+    }
+  ],
+  "applications": [
+    {
+      "company_name": "Contoso Health",
+      "role_title": "Data Analyst",
+      "stage": "interviews",
+      "applied_at": "-30d",
+      "location": "Toronto, ON (hybrid)",
+      "source": "Company site",
+      "next_action": "Send thank-you notes to the panel",
+      "next_action_due": "+1d",
+      "events": [
+        {"kind": "interview", "occurred_on": "-20d", "text": "Phone screen with the recruiter."},
+        {"kind": "interview", "occurred_on": "-6d", "text": "Panel with the analytics team: a SQL exercise and a dashboard walkthrough."}
+      ],
+      "contacts": [
+        {"name": "Jordan Example", "role": "Talent partner", "email": "jordan@contoso.example"}
+      ],
+      "posting": {
+        "title": "Data Analyst",
+        "company": "Contoso Health",
+        "description": "Contoso Health is hiring a Data Analyst to build reporting for its clinics.\n\nSalary range: $82,000 - $96,000 CAD per year.\nThis posting is for an existing vacancy. We do not use AI to screen applicants."
+      }
+    },
+    {
+      "company_name": "Fabrikam Retail",
+      "role_title": "Business Intelligence Analyst",
+      "stage": "applied",
+      "applied_at": "-16d",
+      "source": "Referral"
+    },
+    {
+      "company_name": "Northwind Traders",
+      "role_title": "Product Operations Specialist",
+      "stage": "recruiter",
+      "applied_at": "-9d",
+      "source": "Job board",
+      "next_action": "Prepare for the recruiter call",
+      "next_action_due": "+2d",
+      "contacts": [
+        {"name": "Riley Example", "role": "Recruiter", "email": "riley@northwind.example"}
+      ]
+    },
+    {
+      "company_name": "Woodgrove Bank",
+      "role_title": "Reporting Analyst",
+      "stage": "interviews",
+      "applied_at": "-70d",
+      "last_interview_at": "-47d",
+      "source": "Company site"
+    },
+    {
+      "company_name": "Tailspin Toys",
+      "role_title": "Operations Analyst",
+      "stage": "saved",
+      "next_action": "Tailor the CV to the posting",
+      "next_action_due": "+0d"
+    },
+    {
+      "company_name": "Wide World Importers",
+      "role_title": "Data Analyst",
+      "stage": "interviews",
+      "outcome": "rejected",
+      "applied_at": "-60d",
+      "last_interview_at": "-40d",
+      "closed_on": "-25d"
+    },
+    {
+      "company_name": "Adventure Works",
+      "role_title": "Junior Data Analyst",
+      "stage": "applied",
+      "outcome": "ghosted",
+      "applied_at": "-75d",
+      "closed_on": "-10d"
+    },
+    {
+      "company_name": "Litware",
+      "role_title": "Analytics Associate",
+      "stage": "offer",
+      "applied_at": "-40d",
+      "last_interview_at": "-14d",
+      "next_action": "Review the offer and ask about benefits",
+      "next_action_due": "+3d"
+    },
+    {
+      "company_name": "Proseware",
+      "role_title": "Data Quality Analyst",
+      "stage": "discovered"
+    },
+    {
+      "company_name": "Fourth Coffee",
+      "role_title": "Insights Analyst",
+      "stage": "preparing",
+      "next_action": "Ask a former colleague for an introduction",
+      "next_action_due": "+5d"
+    }
+  ],
+  "documents": [
+    {
+      "application": 0,
+      "kind": "cv",
+      "filename": "cv-data-analyst.txt",
+      "content": "Example Person\nData Analyst, Toronto\n\nExperience\n- Built weekly sales dashboards used by 40 store managers.\n- Automated a monthly inventory report, saving two days of work each month.\n"
+    }
+  ],
+  "notifications": [
+    {"application": 3, "kind": "decision_due", "title": "No decision yet from Woodgrove Bank?", "body": "It is 45 days since your last interview. In Ontario, an employer with 25 or more employees must tell you by now whether a decision has been made."},
+    {"application": 1, "kind": "quiet_application", "title": "No news from Fabrikam Retail for 16 days", "body": "Business Intelligence Analyst at Fabrikam Retail. Follow up, or mark it as ghosted."},
+    {"application": 4, "kind": "next_action_due", "title": "Due: Tailor the CV to the posting", "body": "Operations Analyst at Tailspin Toys."}
+  ]
+}

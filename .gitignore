@@ -28,3 +28,6 @@ node_modules/
 web/dist/
 *.tsbuildinfo
 coverage/
+
+# Celery beat keeps its schedule state here when run locally
+celerybeat-schedule*

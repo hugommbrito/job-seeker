@@ -1,0 +1,24 @@
+# The model gateway, deployed as its own Coolify application with the Docker Compose build pack:
+#
+#   Base Directory:           /infra/litellm
+#   Docker Compose Location:  /docker-compose.coolify.yml
+#
+# It is a separate resource because Coolify gives every variable of a compose application to
+# every one of its services: in the app's compose file, the provider key would reach the api.
+# Internal only: give it no domain. The worker reaches it over the predefined network.
+# See docs/operations/deploy.md and ADR 0008.
+
+services:
+  litellm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?}
+      # Used only to create the worker's budget-capped virtual key, by hand.
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?}
+      # The `litellm` role and database created by infra/postgres/bootstrap.sh.
+      DATABASE_URL: ${LITELLM_DATABASE_URL:?}
+      # Nothing here is administered through a browser.
+      DISABLE_ADMIN_UI: "True"

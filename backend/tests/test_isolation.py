@@ -11,7 +11,6 @@ import json
 
 import pytest
 from django.db import connection
-from django.forms.models import model_to_dict
 from django.test import Client
 
 from apps.accounts.models import Role
@@ -22,6 +21,17 @@ from tests.canaries import SEEDERS, plant, planted_ids
 from tests.routes import all_routes
 
 pytestmark = pytest.mark.django_db
+
+
+def _columns(row) -> dict[str, object]:
+    """Every stored column of a row, bytes included (model_to_dict skips non-editable ones)."""
+    values = {}
+    for field in row._meta.concrete_fields:
+        value = getattr(row, field.attname)
+        if isinstance(value, (bytes, memoryview)):
+            value = bytes(value).decode("utf-8", errors="replace")
+        values[field.attname] = value
+    return values
 
 
 @pytest.fixture
@@ -48,7 +58,7 @@ def test_each_seeder_really_plants_its_canary(tenants):
     user, canaries = tenants["b"]
     with tenant_context(user.pk):
         stored = json.dumps(
-            [model_to_dict(row) for model in SEEDERS for row in model.objects.all()], default=str
+            [_columns(row) for model in SEEDERS for row in model.objects.all()], default=str
         )
     assert len(canaries) == len(SEEDERS)
     for canary in canaries:
@@ -62,7 +72,7 @@ def test_a_query_with_no_filter_returns_only_the_callers_rows(tenants):
             rows = list(model.objects.all())
             assert rows, f"{model.__name__}: the caller's own row is missing"
             assert {row.user_id for row in rows} == {a.pk}
-            dumped = json.dumps([model_to_dict(row) for row in rows], default=str)
+            dumped = json.dumps([_columns(row) for row in rows], default=str)
             assert any(canary in dumped for canary in own)
             assert not any(canary in dumped for canary in foreign)
 
@@ -85,7 +95,7 @@ def test_another_users_rows_cannot_be_changed_or_deleted(tenants):
             assert model.objects.filter(user_id=b.pk).update(user_id=a.pk) == 0
     with tenant_context(b.pk):
         for model in classification.tenant_models():
-            dumped = json.dumps([model_to_dict(row) for row in model.objects.all()], default=str)
+            dumped = json.dumps([_columns(row) for row in model.objects.all()], default=str)
             assert any(canary in dumped for canary in foreign), "tenant B's row was touched"
 
 

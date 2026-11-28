@@ -5,6 +5,7 @@ There is no sign-up route: accounts are created with `manage.py create_user`.
 
 from __future__ import annotations
 
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as start_session
 from django.contrib.auth import logout as end_session
@@ -89,3 +90,41 @@ def logout(request: HttpRequest) -> Status[None]:
 def me(request: HttpRequest) -> User:
     assert isinstance(request.user, User)
     return request.user
+
+
+class OptionsOut(Schema):
+    demo_login: bool
+
+
+@router.get("/options", auth=None, response=OptionsOut)
+@demo_readable
+def options(request: HttpRequest) -> OptionsOut:
+    """What the sign-in page may offer."""
+    return OptionsOut(demo_login=settings.DEMO_LOGIN_ENABLED)
+
+
+@router.post(
+    "/demo",
+    auth=None,
+    response={200: UserOut, 403: ErrorOut, 404: ErrorOut, 429: ErrorOut, 503: ErrorOut},
+)
+@demo_denied
+def demo_login(request: HttpRequest, response: HttpResponse) -> Status[User] | Status[ErrorOut]:
+    """Sign in as the guest. Off unless DEMO_LOGIN_ENABLED, which the deploy sets only after the
+    isolation suite and the catalog meta-test have passed against the instance."""
+    if not settings.DEMO_LOGIN_ENABLED:
+        return Status(404, ErrorOut(detail="Not Found"))
+    if check_csrf(request) is not None:
+        raise HttpError(403, "CSRF check failed.")
+    address = throttle.client_address(request)
+    wait = throttle.demo_wait(address)
+    if wait:
+        response["Retry-After"] = str(wait)
+        return Status(429, ErrorOut(detail="Too many demo sessions from here. Try again later."))
+    guest = User.objects.filter(email=settings.DEMO_EMAIL, role=Role.DEMO).first()
+    if guest is None:
+        return Status(503, ErrorOut(detail="The demo is not available right now."))
+    throttle.record_demo(address)
+    start_session(request, guest, backend="django.contrib.auth.backends.ModelBackend")
+    request.session.set_expiry(settings.DEMO_SESSION_SECONDS)
+    return Status(200, guest)

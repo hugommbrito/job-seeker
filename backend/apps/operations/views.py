@@ -2,7 +2,7 @@
 
 `/health` says the process is up and nothing more; it touches no database, so a slow query can
 never make the platform restart a healthy container. Whether work is getting done is a different
-question, answered by `/operations` once there is work (Phase 1).
+question, answered by `/api/operations` (apps.operations.api).
 """
 
 from __future__ import annotations

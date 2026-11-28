@@ -9,16 +9,27 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Annotated, Any, Literal
 
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db.models import F, Q, QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
-from ninja import Field, Query, Router, Schema, Status
+from ninja import Field, File, Query, Router, Schema, Status, UploadedFile
 from ninja.errors import HttpError
 from pydantic import AfterValidator, StringConstraints
 
 from apps.accounts.demo import demo_denied, demo_readable
-from apps.applications import services
-from apps.applications.models import Application, ApplicationEvent, EventKind, Outcome, Stage
+from apps.applications import importer, services
+from apps.applications.models import (
+    Application,
+    ApplicationEvent,
+    Contact,
+    EventKind,
+    Outcome,
+    Stage,
+)
+from apps.documents.api import DocumentOut
+from apps.documents.models import Document
 
 router = Router(tags=["applications"])
 
@@ -28,6 +39,15 @@ def _web_url(value: str) -> str:
     # would run in the page of whoever opens it.
     if value and not value.lower().startswith(("https://", "http://")):
         raise ValueError("must be an http or https URL")
+    return value
+
+
+def _email(value: str) -> str:
+    if value:
+        try:
+            validate_email(value)
+        except ValidationError as error:
+            raise ValueError("is not an email address") from error
     return value
 
 
@@ -106,13 +126,62 @@ class EventOut(Schema):
     created_at: datetime
 
 
+Email = Annotated[
+    str, StringConstraints(strip_whitespace=True, max_length=254), AfterValidator(_email)
+]
+ProfileUrl = Annotated[
+    str, StringConstraints(strip_whitespace=True, max_length=500), AfterValidator(_web_url)
+]
+Phone = Annotated[str, StringConstraints(strip_whitespace=True, max_length=50)]
+LongText = Annotated[str, StringConstraints(max_length=5000)]
+
+
+class ContactIn(Schema):
+    name: Name
+    role: Short = ""
+    email: Email = ""
+    phone: Phone = ""
+    profile_url: ProfileUrl = ""
+    notes: LongText = ""
+
+
+class ContactPatch(Schema):
+    name: Name | None = None
+    role: Short | None = None
+    email: Email | None = None
+    phone: Phone | None = None
+    profile_url: ProfileUrl | None = None
+    notes: LongText | None = None
+
+
+class ContactOut(Schema):
+    id: int
+    name: str
+    role: str
+    email: str
+    phone: str
+    profile_url: str
+    notes: str
+    created_at: datetime
+
+
 class ApplicationDetailOut(ApplicationOut):
     posting_snapshot: dict[str, Any]
     events: list[EventOut]
+    contacts: list[ContactOut]
+    documents: list[DocumentOut]
 
     @staticmethod
     def resolve_events(obj: Application) -> list[ApplicationEvent]:
         return list(obj.events.order_by("-occurred_on", "-created_at", "-id"))
+
+    @staticmethod
+    def resolve_contacts(obj: Application) -> list[Contact]:
+        return list(obj.contacts.order_by("name", "id"))
+
+    @staticmethod
+    def resolve_documents(obj: Application) -> list[Document]:
+        return list(obj.documents.order_by("-created_at", "-id"))
 
 
 class StageIn(Schema):
@@ -279,3 +348,61 @@ def delete_event(request: HttpRequest, application_id: int, event_id: int) -> St
         raise HttpError(409, "Only notes and interviews can be deleted.")
     services.delete_event(event)
     return Status(204, None)
+
+
+def _contact(application_id: int, contact_id: int) -> Contact:
+    return get_object_or_404(Contact, pk=contact_id, application_id=application_id)
+
+
+@router.post("/{int:application_id}/contacts", response={201: ContactOut})
+@demo_denied
+def add_contact(request: HttpRequest, application_id: int, payload: ContactIn) -> Status[Contact]:
+    contact = Contact(application=_application(application_id), **payload.model_dump())
+    contact.full_clean(exclude=["user"])
+    contact.save()
+    return Status(201, contact)
+
+
+@router.patch("/{int:application_id}/contacts/{int:contact_id}", response=ContactOut)
+@demo_denied
+def update_contact(
+    request: HttpRequest, application_id: int, contact_id: int, payload: ContactPatch
+) -> Contact:
+    contact = _contact(application_id, contact_id)
+    changes = payload.model_dump(exclude_unset=True)
+    if "name" in changes and changes["name"] is None:
+        raise HttpError(422, "name cannot be empty.")
+    for name, value in changes.items():
+        setattr(contact, name, value if value is not None else "")
+    contact.full_clean(exclude=["user"])
+    contact.save()
+    return contact
+
+
+@router.delete("/{int:application_id}/contacts/{int:contact_id}", response={204: None})
+@demo_denied
+def delete_contact(request: HttpRequest, application_id: int, contact_id: int) -> Status[None]:
+    _contact(application_id, contact_id).delete()
+    return Status(204, None)
+
+
+class ImportOut(Schema):
+    created: int
+    skipped: int
+    errors: list[str]
+
+
+@router.post("/import", response={200: ImportOut, 422: ImportOut})
+@demo_denied
+def import_applications(request: HttpRequest, file: File[UploadedFile]) -> Status[ImportOut]:
+    """Import past applications from a CSV or JSON file: every row, or none and why."""
+    if file.size is not None and file.size > importer.MAX_BYTES:
+        return Status(
+            422, ImportOut(created=0, skipped=0, errors=["The file is larger than 1 MB."])
+        )
+    try:
+        result = importer.import_file(file.name or "", file.read())
+    except importer.ImportRefused as refusal:
+        return Status(422, ImportOut(created=0, skipped=0, errors=[str(refusal)]))
+    out = ImportOut(created=result.created, skipped=result.skipped, errors=result.errors)
+    return Status(422 if result.errors else 200, out)
