@@ -9,13 +9,21 @@ synthetic demo on the same instance.
 
 ## Status
 
-**Phase 0 (foundation) is implemented; nothing is deployed yet.** What exists today is the base
-everything else stands on: accounts and sessions, per-user isolation enforced by the database,
-the checks that keep it honest, and an empty app that two people can sign in to. Collection,
-ranking, the tracker and the CV builder are the next phases.
+**Phase 1 (the lean tracker) is implemented; it is not deployed yet.** Phase 0, the foundation,
+is deployed. What exists today:
 
-The full design is in [docs/planning](docs/planning/README.md); decisions taken since are in
-[docs/adr](docs/adr/README.md).
+- **A tracker**: a kanban board and a table of applications, each with its timeline, contacts,
+  the documents that were sent, a next action, and Ontario's 45-day decision clock.
+- **Capture**: paste a posting, a model reads it in the background, you review every field, and
+  it becomes an application with a frozen copy of the posting. Without a model it still works:
+  the fields are typed in.
+- **Reminders**: due next actions, the 45-day clock and quiet applications, each once, in the
+  app and on Telegram outside your quiet hours.
+- **Import** of past applications from CSV or JSON, a first-run wizard, and a **guest login** to a
+  synthetic demo.
+
+Ranking and the collection of postings from job boards are next. The full design is in
+[docs/planning](docs/planning/README.md); decisions taken since are in [docs/adr](docs/adr/README.md).
 
 ## How isolation works
 
@@ -57,10 +65,12 @@ This is the part of Phase 0 worth reading the code for.
 ```
 backend/           Django project
   config/          settings, URLs, API wiring
-  apps/            one Django app per domain: tenancy, accounts, profiles, operations
+  apps/            one Django app per domain: tenancy, accounts, profiles, applications,
+                   postings, documents, llm, notifications, demo, operations
   tests/           pytest suite; runs against a real Postgres as the app role
 web/               React client
-infra/             Dockerfile, compose files, Postgres bootstrap script
+infra/             Dockerfile, compose files, Postgres bootstrap script, the model gateway
+demo/              the synthetic persona the guest sees
 scripts/           hygiene checks, smoke test, restore drill
 docs/planning/     the design and the decision log
 docs/adr/          later decisions
@@ -75,11 +85,12 @@ Needs Docker, [uv](https://docs.astral.sh/uv/), and Node 24 with corepack enable
 
 ```sh
 make setup      # git hooks, .env from .env.example, dependencies
-make db-up      # Postgres with the roles and extensions created on first start
+make db-up      # Postgres (roles and extensions created on first start) and Redis
 make migrate    # as the schema owner
 make user EMAIL=you@example.org ROLE=owner
 
 make run        # API on http://127.0.0.1:8000
+make worker     # background tasks; `make beat` runs the schedule
 make web        # web client on http://localhost:5173
 ```
 

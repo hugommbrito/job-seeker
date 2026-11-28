@@ -4,7 +4,8 @@ How the app is deployed on a single server managed by Coolify, and how to check 
 sound. The reasoning behind the layout is in
 [ADR 0004](../adr/0004-deployment-topology-on-coolify.md).
 
-**Status on 2026-11-24: deployed, and section 5 passed** (`verify`, the smoke test with two
+**Status on 2026-11-24: Phase 0 deployed, and section 5 passed; Phase 1 (section 7) not yet
+deployed.** (`verify`, the smoke test with two
 users and HSTS on, `make hygiene`, and a browser sign-in). Before the server existed, the image,
 `migrate` followed by `api`, the mounted credential, `api` refusing that credential and
 bootstrap-then-restore were rehearsed locally with Docker. The Coolify-specific steps were
@@ -180,15 +181,102 @@ recovery is always: create a database resource, run `bootstrap.sh`, then restore
 is taken by the database's superuser, which row-level security does not filter, so it holds
 every user's rows.
 
-## 7. Routine operations
+## 7. Phase 1: background work, the model gateway, Telegram and the demo
+
+**Status on 2026-11-24: written, not yet run on the server.** The code is in place and tested
+locally; nothing below has been verified on Coolify. Do these before deploying a Phase 1 commit,
+in this order, because the compose file now refuses to start without `REDIS_PASSWORD`.
+
+### 7.1 Variables for the app
+
+| Variable | Value |
+| --- | --- |
+| `REDIS_PASSWORD` | Required. 32 or more random characters. Redis is on the shared predefined network |
+| `APP_BASE_URL` | `https://jobs.example.org`, for links in pushed messages |
+| `TELEGRAM_BOT_USERNAME` | The bot's username without `@`, once the bot exists (7.4). Empty hides the option |
+| `LLM_GATEWAY_URL` | `http://<litellm-host>:4000` once the gateway runs (7.3). Empty: captures are filled in by hand |
+| `DEMO_SEED` | `1` to rebuild the guest's synthetic tenant on every deploy |
+| `DEMO_LOGIN_ENABLED` | `0` until 7.6 has passed on this instance, then `1` |
+| `HTTP_USER_AGENT` | Optional: add a contact address to the default `job-seeker/0.1 (...)` |
+
+### 7.2 The worker's secrets
+
+Like the schema owner's credential, these are files mounted into one service, the worker, so
+they never reach the api (ADR 0008, ADR 0010). A missing file turns that feature off; nothing
+fails to start.
+
+```sh
+sudo install -d -m 700 -o 999 -g 999 /data/job-seeker/worker-secrets
+# Later, one file per secret, each written the same way:
+sudo sh -c 'umask 077; cat > /data/job-seeker/worker-secrets/llm_gateway_key'      # 7.3
+sudo sh -c 'umask 077; cat > /data/job-seeker/worker-secrets/telegram_bot_token'   # 7.4
+sudo chown 999:999 /data/job-seeker/worker-secrets/* && sudo chmod 400 /data/job-seeker/worker-secrets/*
+```
+
+**Verify** after the deploy: `docker exec <api-container> env | grep -c -E 'ANTHROPIC|LLM_GATEWAY_KEY|TELEGRAM_BOT_TOKEN|LITELLM'`
+prints `0`. The api also refuses to start with a model key in its environment (`llm.E001`).
+
+### 7.3 The model gateway (needs the Anthropic key)
+
+1. Re-run the bootstrap with `LITELLM_DB_PASSWORD` set, which adds the `litellm` role and
+   database (section 1).
+2. Create a second Coolify application from this repository with the Docker Compose build pack:
+   Base Directory `/infra/litellm`, Docker Compose Location `/docker-compose.coolify.yml`.
+   Enable **Connect to Predefined Network**. Give it **no domain**.
+3. Its variables: `ANTHROPIC_API_KEY`, `LITELLM_MASTER_KEY` (a long random string) and
+   `LITELLM_DATABASE_URL` (`postgres://litellm:<password>@<db-host>:5432/litellm`). Deploy.
+4. Create the worker's key with a hard budget, from the server, against the gateway's internal
+   address; adjust the budget to taste:
+
+   ```sh
+   curl -s http://<litellm-host>:4000/key/generate \
+     -H "Authorization: Bearer $LITELLM_MASTER_KEY" -H 'Content-Type: application/json' \
+     -d '{"key_alias": "worker", "models": ["extractor", "fit-judge", "email-classifier", "writer"],
+          "max_budget": 20, "budget_duration": "30d"}'
+   ```
+
+   Write the returned key to `worker-secrets/llm_gateway_key` (7.2), set `LLM_GATEWAY_URL` in
+   the app, and redeploy it.
+5. **Run the spike** (implementation plan, section 3.4), on the worker:
+   `docker exec <worker-container> entrypoint manage llm_spike`. It makes four small calls and
+   prints PASS or FAIL for structured output, caching, adaptive thinking with effort, and
+   refusal fallbacks (the last is informational). If any of the first three fails, set
+   `LLM_GATEWAY_URL` to `http://<litellm-host>:4000/anthropic` and `LLM_MODEL_EXTRACTOR` (and
+   the other `LLM_MODEL_*`) to `claude-opus-5-5`, redeploy and run it again. If fallbacks pass,
+   `LLM_REFUSAL_FALLBACKS=1` turns them on. Record the result in ADR 0008's follow-up.
+
+### 7.4 Telegram (needs a bot)
+
+Create a bot with Telegram's BotFather. Its token goes to `worker-secrets/telegram_bot_token`
+(7.2), its username to `TELEGRAM_BOT_USERNAME`. No webhook is registered: the worker polls.
+Then link a chat from the app's settings and press **Send a test**.
+
+### 7.5 The worker and the scheduler
+
+`worker`, `beat` and `redis` start with the app. **Verify**: as the owner, `GET /api/operations`
+lists every scheduled task, and none is `overdue` once a few minutes have passed (the daily
+housekeeping is overdue until its first run, a day after the first deploy at most).
+
+### 7.6 Phase 1 acceptance
+
+1. Section 5 again: `verify`, the smoke test, `make hygiene`.
+2. A pasted posting becomes an application in under a minute, from **Add posting**: with the
+   gateway, the fields arrive filled in; without it, they are typed in.
+3. A next action due today produces one notification, in the app and in Telegram outside quiet
+   hours, and no second one on later scans.
+4. Only then set `DEMO_LOGIN_ENABLED=1`. As the guest: every page opens, and any change answers
+   403 without signing the guest out.
+
+## 8. Routine operations
 
 - **Deploy**: push to `main` and deploy from Coolify. Migrations run first, as above.
 - **Roll back**: redeploy the previous commit from Coolify. Migrations are not reversed
   automatically; a release that needs a schema rollback says so in its commit message.
 - **Rotate a database password**: run `bootstrap.sh` with the new value, then update
   `APP_DATABASE_URL` in Coolify or the file from section 2, and redeploy.
-- **Housekeeping**: `entrypoint manage clear_expired` deletes expired sessions and finished
-  sign-in throttle windows. It becomes a scheduled task in Phase 1.
+- **Housekeeping**: expired sessions, finished sign-in throttle windows and old task records are
+  cleared daily by the `operations.housekeeping` task; `entrypoint manage clear_expired` does the
+  first two by hand.
 - **What runs where**: `/health` says the process is up and touches no database. The `api`
   container refuses to start if its database role could bypass row-level security; if a deploy
   fails at start with an error mentioning `tenancy.E00x`, the DSN is wrong, not the code.
