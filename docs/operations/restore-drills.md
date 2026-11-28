@@ -34,6 +34,7 @@ version, and at least twice a year.
 | Date | Source of the archive | Archive size | Duration | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
 | 2026-11-21 | Local development database, dumped with `pg_dump -Fc` | 32 KB | 3 s | Passed | **Rehearsal of the procedure, not a drill.** Two synthetic users with one row each. It proves the script and the bootstrap-then-restore order; it says nothing about the off-host backup, which does not exist yet |
+| 2026-11-27 | Off-host bucket of the deployed instance (OCI Object Storage): a Coolify backup run by hand, downloaded from the console | 32 KB | 2 s | Passed | **First drill from the off-host bucket.** 17 migrations and 2 users came back, every table kept `migrator` as owner and the `app` role kept its grants, so Coolify's dump preserves owners and privileges. The only tenant table at this version, `profiles_profile`, is still empty: the no-user check read 0 of 0 rows and the per-user check did not run. Repeat once tenant rows exist, from a scheduled backup |
 
 The Phase 0 acceptance needs one row here whose source is the off-host bucket of the deployed
-instance.
+instance: the row of 2026-11-27.
