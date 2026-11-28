@@ -14,6 +14,11 @@ added and the old one gets a line pointing to it.
 | [0004](0004-deployment-topology-on-coolify.md) | Deployment topology on Coolify | Proposed |
 | [0005](0005-web-scaffold-scope.md) | The web scaffold has no router and no service worker yet | Accepted |
 | [0006](0006-references-between-tenant-tables-match-the-owner.md) | References between tenant tables also match the owner | Accepted |
+| [0007](0007-background-work-and-dependency-versions.md) | Background work on Celery and Redis, and how new dependencies are versioned | Accepted |
+| [0008](0008-model-gateway-calls-and-keys.md) | How the worker calls the model gateway, and where its keys live | Accepted; deployment Proposed |
+| [0009](0009-first-run-wizard-scope.md) | What the first-run wizard collects in Phase 1 | Accepted |
+| [0010](0010-telegram-linking-and-delivery.md) | Telegram: linked by polling from the worker, delivered once, quiet hours per user | Accepted |
+| [0011](0011-url-capture-and-admin-move-to-phase-2.md) | Capture from a URL and the Django admin move to Phase 2 | Accepted |
 
 ## Format
 
